@@ -14,7 +14,7 @@ endif()
 
 
 EXECUTE_PROCESS(
-    COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/../../common/src/config.rs          
+    COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/../../executor/common/src/config.rs          
     COMMAND grep "pub const MAP_SIZE_POW2"
     COMMAND cut -f2 -d "="  
     COMMAND grep -o "[[:digit:]]*"
@@ -50,7 +50,4 @@ add_library(AngoraPass MODULE AngoraPass.cc)
 target_link_libraries(AngoraPass LLVMPassConfig)
 install (TARGETS AngoraPass DESTINATION ${ANGORA_PASS_DIR})
 
-add_library(DFSanPass MODULE DFSanPass.cc)
-target_link_libraries(DFSanPass LLVMPassConfig)
-install (TARGETS DFSanPass DESTINATION ${ANGORA_PASS_DIR})
 
