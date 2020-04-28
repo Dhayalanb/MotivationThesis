@@ -1,0 +1,3 @@
+[submodule "includes/Angora"]
+	path = includes/Angora
+	url = https://github.com/Luc-Veldhuis/Angora
