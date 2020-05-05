@@ -7,7 +7,16 @@ export CC=clang
 export CXX=clang++
 PREFIX=${PREFIX:-${ROOT_DIR}/bin/}
 
-cd compiler
+cd executor
+cargo build
+cargo build --release
+
+rm -rf ${PREFIX}
+mkdir -p ${PREFIX}
+mkdir -p ${PREFIX}/lib
+cp target/release/*.a ${PREFIX}/lib
+
+cd ../compiler
 rm -rf build
 mkdir -p build
 cd build

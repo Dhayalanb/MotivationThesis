@@ -349,3 +349,5 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 .vscode/
+/executor/target/.rustc_info.json
+/executor/Cargo.lock

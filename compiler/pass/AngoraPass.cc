@@ -479,30 +479,6 @@ void AngoraLLVMPass::visitCompareFunc(Instruction *Inst) {
     return;
   }
   ConstantInt *Cid = ConstantInt::get(Int32Ty, getInstructionId(Inst));
-
-  CallInst *Caller = dyn_cast<CallInst>(Inst);
-  Value *OpArg[2];
-  OpArg[0] = Caller->getArgOperand(0);
-  OpArg[1] = Caller->getArgOperand(1);
-
-  if (!OpArg[0]->getType()->isPointerTy() ||
-      !OpArg[1]->getType()->isPointerTy()) {
-    return;
-  }
-
-  Value *ArgSize = nullptr;
-  if (Caller->getNumArgOperands() > 2) {
-    ArgSize = Caller->getArgOperand(2); // int32ty
-  } else {
-    ArgSize = ConstantInt::get(Int32Ty, 0);
-  }
-
-  IRBuilder<> IRB(Inst);
-  LoadInst *CurCtx = IRB.CreateLoad(AngoraContext);
-  setInsNonSan(CurCtx);
-  CallInst *ProxyCall =
-      IRB.CreateCall(TraceFnTT, {Cid, CurCtx, ArgSize, OpArg[0], OpArg[1]});
-  setInsNonSan(ProxyCall);
 }
 
 Value *AngoraLLVMPass::castArgType(IRBuilder<> &IRB, Value *V) {

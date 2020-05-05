@@ -6,4 +6,16 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name="runtime_fast"
+crate-type = ["staticlib"] # "cdylib"
+
 [dependencies]
+libc = "0.2"
+lazy_static = "1.1"
+byteorder = "1.2"
+angora_common = { path = "../common" }
+ctor = "0.1.9"
+
+[build-dependencies]
+cc = "1.0"
