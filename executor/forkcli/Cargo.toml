@@ -16,6 +16,7 @@ lazy_static = "1.1"
 byteorder = "1.2"
 angora_common = { path = "../common" }
 ctor = "0.1.9"
+bincode = "1.0"
 
 [build-dependencies]
 cc = "1.0"

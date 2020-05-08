@@ -1,8 +1,8 @@
 // corresponding to fuzzer/src/cond_stmt/shm_conds.rs
 
-use angora_common::{cond_stmt_base::CondStmtBase, defs, shm};
-use std::{env, process, ops::DerefMut, sync::Mutex};
-use super::context;
+use angora_common::{cond_stmt_base::CondStmtBase, shm};
+use std::{ops::DerefMut, sync::Mutex};
+use super::{context};
 use lazy_static::lazy_static;
 
 #[no_mangle]
@@ -26,19 +26,16 @@ unsafe impl Send for ShmConds {}
 // Drop in common/shm.rs:
 // Though SHM<T> implement "drop" function, but it won't call (as we want) since ShmConds is in lazy_static!
 impl ShmConds {
-    pub fn get_from_env_id() -> Option<Self> {
-        let id_val = env::var(defs::COND_STMT_ENV_VAR);
-        match id_val {
-            Ok(val) => {
-                let shm_id = val.parse::<i32>().expect("Could not parse i32 value.");
-                let cond = shm::SHM::<CondStmtBase>::from_id(shm_id);
-                if cond.is_fail() {
-                    process::exit(1);
-                }
-                Some(Self { cond, rt_order: 0 })
-            }
-            Err(_) => None,
+    pub fn get_shm() -> Self {
+        println!("Creating new SHM");
+        return Self {
+            cond : shm::SHM::<CondStmtBase>::new(),
+            rt_order : 0,
         }
+    }
+
+    pub fn get_condition(&mut self) -> CondStmtBase {
+        return *self.cond;
     }
 
     #[inline(always)]
@@ -80,7 +77,7 @@ impl ShmConds {
 }
 
 lazy_static! {
-    pub static ref SHM_CONDS: Mutex<Option<ShmConds>> = Mutex::new(ShmConds::get_from_env_id());
+    pub static ref SHM_CONDS: Mutex<Option<ShmConds>> = Mutex::new(Some(ShmConds::get_shm()));
 }
 
 #[inline(always)]

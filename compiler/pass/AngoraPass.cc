@@ -668,9 +668,9 @@ bool AngoraLLVMPass::runOnModule(Module &M) {
         Instruction *Inst = *inst;
         if (Inst->getMetadata(NoSanMetaId))
           continue;
-        if (Inst == &(*BB->getFirstInsertionPt())) {
-          countEdge(M, *BB);
-        }
+        /*if (Inst == &(*BB->getFirstInsertionPt())) {
+          countEdge(M, *BB);//disable keep track of new branches
+        }*/
         if (isa<CallInst>(Inst)) {
           visitCallInst(Inst);
         } else if (isa<InvokeInst>(Inst)) {

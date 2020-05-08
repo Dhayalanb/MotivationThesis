@@ -1,5 +1,6 @@
 // map branch counting shared memory.
 
+//NEVER CALLED, USED TO KEEP TRACK OF NEW BRANCHES VIA SHARED MEMORY
 use angora_common::config::BRANCHES_SIZE;
 use angora_common::defs::BRANCHES_SHM_ENV_VAR;
 use angora_common::shm;

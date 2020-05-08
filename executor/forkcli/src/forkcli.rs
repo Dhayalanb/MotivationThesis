@@ -5,6 +5,8 @@ use std::env;
 use byteorder::{LittleEndian, WriteBytesExt};
 use libc;
 use std::{io::prelude::*, os::unix::net::UnixStream, process, time::Duration};
+use std::ops::DerefMut;
+use bincode;
 
 pub fn start_forkcli() {
     match env::var(defs::FORKSRV_SOCKET_PATH_VAR) {
@@ -57,13 +59,26 @@ pub fn start_forkcli() {
                 status_buf
                     .write_i32::<LittleEndian>(status)
                     .expect("Could not write to child.");
+                    println!("Status {}", status);
                 if socket.write(&status_buf).is_err() {
                     process::exit(1);
+                }
+                let mut conds = super::shm_conds::SHM_CONDS.lock().expect("SHM mutex poisoned.");
+                match conds.deref_mut() {
+                    &mut Some(ref mut c) => {
+                        if socket.write(&bincode::serialize(&c.get_condition()).unwrap()).is_err() {
+                            process::exit(1);
+                        }
+                    }
+                    _ => {
+                        eprintln!("Could not lock SHM");
+                        process::exit(1);
+                    }
                 }
             }
         },
         Err(_) => {
-            // eprintln!("Could not find socket path");
+            eprintln!("Could not find socket path");
         },
     }
 }
