@@ -1,6 +1,6 @@
 // server: fuzzer/src/forsrv.rs
-use angora_common::{config, defs};
-use std::env;
+use angora_common::{config, defs, cond_stmt_base::CondStmtBase};
+use std::{env, mem};
 
 use byteorder::{LittleEndian, WriteBytesExt};
 use libc;
@@ -30,11 +30,29 @@ pub fn start_forkcli() {
             super::shm_conds::reset_shm_conds();
 
             loop {
+                let mut conds = super::shm_conds::SHM_CONDS.lock().expect("SHM mutex poisoned.");
+                println!("Waiting for signal");
                 if socket.read(&mut sig_buf).is_err() {
                     eprintln!("exit forkcli");
                     process::exit(0);
                 }
+                println!("Signal received");
+                println!("Waiting for condstmtbase");
+                let mut cond_stmt_base_buff = vec![0u8; mem::size_of::<CondStmtBase>()];
+                if socket.read(&mut cond_stmt_base_buff).is_err() {
+                    eprintln!("exit forkcli");
+                    process::exit(0);
+                }
+                println!("Receiving condstmtbase");
+                match conds.deref_mut() {
+                    &mut Some(ref mut c) => {
+                        c.update_cond_stmt_base(bincode::deserialize(&cond_stmt_base_buff).unwrap());
+                        println!("Condstmt: {:?}", c.get_condition())
+                    }
+                    _ => {}
+                }
 
+                println!("Forking...");
                 let child_pid = unsafe { libc::fork() };
 
                 if child_pid == 0 {
@@ -46,24 +64,24 @@ pub fn start_forkcli() {
                 pid_buf
                     .write_i32::<LittleEndian>(child_pid)
                     .expect("Could not write to child.");
+                println!("Writing child PID {:?}", pid_buf);
                 if socket.write(&pid_buf).is_err() {
                     process::exit(1);
                 }
-
+                println!("Waiting for child");
                 let mut status: libc::c_int = 0;
                 if unsafe { libc::waitpid(child_pid, &mut status as *mut libc::c_int, 0) } < 0 {
                     process::exit(1);
                 }
-
+                println!("Child terminated");
                 let mut status_buf = vec![];
                 status_buf
                     .write_i32::<LittleEndian>(status)
                     .expect("Could not write to child.");
-                    println!("Status {}", status);
+                println!("Writing status {:?}", status);
                 if socket.write(&status_buf).is_err() {
                     process::exit(1);
                 }
-                let mut conds = super::shm_conds::SHM_CONDS.lock().expect("SHM mutex poisoned.");
                 match conds.deref_mut() {
                     &mut Some(ref mut c) => {
                         if socket.write(&bincode::serialize(&c.get_condition()).unwrap()).is_err() {

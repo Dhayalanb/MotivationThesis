@@ -38,6 +38,21 @@ impl ShmConds {
         return *self.cond;
     }
 
+    pub fn update_cond_stmt_base(&mut self, cond_stmt_base: CondStmtBase) {
+        self.cond.cmpid = cond_stmt_base.cmpid;
+        self.cond.context = cond_stmt_base.context;
+        self.cond.order = cond_stmt_base.order;
+        self.cond.belong = cond_stmt_base.belong;
+        self.cond.condition = cond_stmt_base.condition;
+        self.cond.level = cond_stmt_base.level;
+        self.cond.op = cond_stmt_base.op;
+        self.cond.size = cond_stmt_base.size;
+        self.cond.lb1 = cond_stmt_base.lb1;
+        self.cond.lb2 = cond_stmt_base.lb2;
+        self.cond.arg1 = cond_stmt_base.arg1;
+        self.cond.arg2 = cond_stmt_base.arg2;
+    }
+
     #[inline(always)]
     fn mark_reachable(&mut self, condition: u32) {
         self.cond.lb1 = condition;
