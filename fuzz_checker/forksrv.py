@@ -44,7 +44,7 @@ class ForkSrv:
                     cmp_data = connection.recv(CondStmtBase.getSize())
                     print('received "%s"', cmp_data)
                     receivedCondStmtBase = CondStmtBase.createFromStruct(cmp_data)
-                    print(CondStmtBase)
+                    print(receivedCondStmtBase.__dict__)
 
                     break
                     

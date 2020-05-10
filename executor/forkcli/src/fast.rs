@@ -24,6 +24,8 @@ pub extern "C" fn __angora_trace_cmp(
     let mut conds = shm_conds::SHM_CONDS.lock().expect("SHM mutex poisoned.");
     match conds.deref_mut() {
         &mut Some(ref mut c) => {
+            let cond = c.get_condition();
+            println!("Checking {} {} vs {} {}", cmpid, context, cond.cmpid, cond.context);
             if c.check_match(cmpid, context) {
                 return c.update_cmp(condition, arg1, arg2);
             }

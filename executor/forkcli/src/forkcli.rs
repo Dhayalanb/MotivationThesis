@@ -30,7 +30,6 @@ pub fn start_forkcli() {
             super::shm_conds::reset_shm_conds();
 
             loop {
-                let mut conds = super::shm_conds::SHM_CONDS.lock().expect("SHM mutex poisoned.");
                 println!("Waiting for signal");
                 if socket.read(&mut sig_buf).is_err() {
                     eprintln!("exit forkcli");
@@ -44,18 +43,22 @@ pub fn start_forkcli() {
                     process::exit(0);
                 }
                 println!("Receiving condstmtbase");
-                match conds.deref_mut() {
-                    &mut Some(ref mut c) => {
-                        c.update_cond_stmt_base(bincode::deserialize(&cond_stmt_base_buff).unwrap());
-                        println!("Condstmt: {:?}", c.get_condition())
+                {
+                    let mut conds = super::shm_conds::SHM_CONDS.lock().expect("SHM mutex poisoned.");
+                    match conds.deref_mut() {
+                        &mut Some(ref mut c) => {
+                            c.update_cond_stmt_base(bincode::deserialize(&cond_stmt_base_buff).unwrap());
+                            println!("Condstmt: {:?}", c.get_condition())
+                        }
+                        _ => {}
                     }
-                    _ => {}
                 }
 
                 println!("Forking...");
                 let child_pid = unsafe { libc::fork() };
-
+                
                 if child_pid == 0 {
+                    println!("print works from child!");
                     super::shm_conds::reset_shm_conds();
                     return;
                 }
@@ -82,15 +85,18 @@ pub fn start_forkcli() {
                 if socket.write(&status_buf).is_err() {
                     process::exit(1);
                 }
-                match conds.deref_mut() {
-                    &mut Some(ref mut c) => {
-                        if socket.write(&bincode::serialize(&c.get_condition()).unwrap()).is_err() {
+                {
+                    let mut conds = super::shm_conds::SHM_CONDS.lock().expect("SHM mutex poisoned.");
+                    match conds.deref_mut() {
+                        &mut Some(ref mut c) => {
+                            if socket.write(&bincode::serialize(&c.get_condition()).unwrap()).is_err() {
+                                process::exit(1);
+                            }
+                        }
+                        _ => {
+                            eprintln!("Could not lock SHM");
                             process::exit(1);
                         }
-                    }
-                    _ => {
-                        eprintln!("Could not lock SHM");
-                        process::exit(1);
                     }
                 }
             }
