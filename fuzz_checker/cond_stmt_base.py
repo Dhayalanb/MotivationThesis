@@ -51,6 +51,12 @@ class CondStmtBase:
         condStmtBase.arg2 = data[11]
         return condStmtBase
 
+    @staticmethod
+    def fromJson(json):
+        condStmt = CondStmtBase()
+        condStmt.__dict__.update(json)
+        return condStmt
+
 
     def flip_condition(self):
         if self.condition == defs.COND_FALSE_ST:

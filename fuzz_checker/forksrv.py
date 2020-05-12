@@ -1,14 +1,13 @@
 import socket
-import sys, os
-from shm_conds import CondStmtBase
+import sys, os, stat
+from cond_stmt_base import CondStmtBase
 
 class ForkSrv:
     sock = None
     server_address = '../forksrv_socket'
-
-    def __init__(self, executor):
-        self.condStmts = condStmts.getCondStmts()
-        self.executor = executor
+    connection = None
+    input_folder = '../test/input/'
+    file_hander = None
 
     def listen(self):
         # Make sure the socket does not already exist
@@ -19,35 +18,43 @@ class ForkSrv:
                 raise
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.sock.bind(self.server_address)
+        os.chmod(self.server_address, 0o664 ) #make socket accessable
+        self.file_hander = open(self.input_folder+"1.txt", "wb")
         self.sock.listen(1)
         print("Listening")
-        connection, client_address = self.sock.accept()
+        self.connection, client_address = self.sock.accept()
+        print('connection from', client_address, file=sys.stderr)
         #accepted forkcli
-        try:
-            print('connection from', client_address, file=sys.stderr)
+    
 
-            # Receive the data in small chunks and retransmit it
-            for condStmtBase in self.condStmts:
-                print("Sending signal")
-                connection.sendall(bytes('\x01\x01\x01\x01', encoding='utf8'))#signal start
-                print("Sending condStmtBase")
-                connection.sendall(condStmtBase.toStruct())#send cmpid
-                print("Reveiving pid")
-                pid = connection.recv(4)
-                print('received "%s"', pid)
+    def reset_input_file(self, input_content):
+        self.file_hander.seek(0)
+        self.file_hander.write(input_content)
 
-                print("Reveiving status")
-                status = connection.recv(4)
-                print('received "%s"', status)
+    def run_with_condition(self, condition, input_content):
 
-                print("Reveiving compare data")
-                cmp_data = connection.recv(CondStmtBase.getSize())
-                print('received "%s"', cmp_data)
-                receivedCondStmtBase = CondStmtBase.createFromStruct(cmp_data)
-                print(receivedCondStmtBase.__dict__)
+        self.reset_input_file(input_content)
 
-                executor.processResult(receivedCondStmtBase)
-                
-        finally:
-            # Clean up the connection
-            connection.close()
+        print("Sending signal")
+        self.connection.sendall(bytes('\x01\x01\x01\x01', encoding='utf8'))#signal start
+        print("Sending condStmtBase")
+        self.connection.sendall(condition.toStruct())#send cmpid
+        print("Reveiving pid")
+        pid = self.connection.recv(4)
+        print('received "%s"', pid)
+
+        print("Reveiving status")
+        status = self.connection.recv(4)
+        print('received "%s"', status)
+
+        print("Reveiving compare data")
+        cmp_data = self.connection.recv(CondStmtBase.getSize())
+        print('received "%s"', cmp_data)
+        receivedCondStmtBase = CondStmtBase.createFromStruct(cmp_data)
+        print(receivedCondStmtBase.__dict__)
+        return (status, receivedCondStmtBase)
+
+
+    def close(self):
+        self.file_hander.close()
+        self.connection.close()
