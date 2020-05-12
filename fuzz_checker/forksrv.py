@@ -6,6 +6,10 @@ class ForkSrv:
     sock = None
     server_address = '../forksrv_socket'
 
+    def __init__(self, executor):
+        self.condStmts = condStmts.getCondStmts()
+        self.executor = executor
+
     def listen(self):
         # Make sure the socket does not already exist
         try:
@@ -17,39 +21,33 @@ class ForkSrv:
         self.sock.bind(self.server_address)
         self.sock.listen(1)
         print("Listening")
-        while True:
-            connection, client_address = self.sock.accept()
-            try:
-                print('connection from', client_address, file=sys.stderr)
+        connection, client_address = self.sock.accept()
+        #accepted forkcli
+        try:
+            print('connection from', client_address, file=sys.stderr)
 
-                # Receive the data in small chunks and retransmit it
-                while True:
-                    print("Sending signal")
-                    connection.sendall(bytes('\x01\x01\x01\x01', encoding='utf8'))#signal start
-                    condStmtBase = CondStmtBase()
-                    condStmtBase.cmpid = 3997931254
-                    condStmtBase.context = 201841
-                    condStmtBase.order = 1
-                    print("Sending condStmtBase")
-                    connection.sendall(condStmtBase.toStruct())#send cmpid
-                    print("Reveiving pid")
-                    pid = connection.recv(4)
-                    print('received "%s"', pid)
+            # Receive the data in small chunks and retransmit it
+            for condStmtBase in self.condStmts:
+                print("Sending signal")
+                connection.sendall(bytes('\x01\x01\x01\x01', encoding='utf8'))#signal start
+                print("Sending condStmtBase")
+                connection.sendall(condStmtBase.toStruct())#send cmpid
+                print("Reveiving pid")
+                pid = connection.recv(4)
+                print('received "%s"', pid)
 
-                    print("Reveiving status")
-                    status = connection.recv(4)
-                    print('received "%s"', status)
+                print("Reveiving status")
+                status = connection.recv(4)
+                print('received "%s"', status)
 
-                    print("Reveiving compare data")
-                    cmp_data = connection.recv(CondStmtBase.getSize())
-                    print('received "%s"', cmp_data)
-                    receivedCondStmtBase = CondStmtBase.createFromStruct(cmp_data)
-                    print(receivedCondStmtBase.__dict__)
+                print("Reveiving compare data")
+                cmp_data = connection.recv(CondStmtBase.getSize())
+                print('received "%s"', cmp_data)
+                receivedCondStmtBase = CondStmtBase.createFromStruct(cmp_data)
+                print(receivedCondStmtBase.__dict__)
 
-                    break
-                    
-            finally:
-                # Clean up the connection
-                connection.close()
-server = ForkSrv()
-server.listen()
+                executor.processResult(receivedCondStmtBase)
+                
+        finally:
+            # Clean up the connection
+            connection.close()
