@@ -25,9 +25,11 @@ class Executor:
         for trace in self.traces:
             #TODO filter same conditions out of the loop?
             for i in range(0,len(trace.conditions)):
+                #TODO make strategy search for more than 1 input, how many?
                 new_input = self.strategy.search(trace, i)
                 (status, cond_stmt_base) = self.forkSrv.run_with_condition(trace.conditions[i].base, new_input)
                 self.process_result(status, cond_stmt_base)
+        self.stop()
 
     def process_result(self, status, cond_stmt_base):
         print(status)

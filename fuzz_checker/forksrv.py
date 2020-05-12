@@ -58,3 +58,4 @@ class ForkSrv:
     def close(self):
         self.file_hander.close()
         self.connection.close()
+        os.remove(self.server_address)
