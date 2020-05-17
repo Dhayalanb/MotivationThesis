@@ -8,6 +8,7 @@ class Executor:
     traces = None
     forkSrv = None
     strategy = None
+    NUMBER_OF_TRIES = 50
 
     def setup_forksvr(self):
         self.forkSrv = ForkSrv()
@@ -17,18 +18,23 @@ class Executor:
         importer = Importer(folder)
         self.traces =  importer.get_file_contents()
 
-    def set_strategy(self, strategy):
-        self.strategy = strategy
+    def set_strategies(self, strategies):
+        self.strategies = strategies
 
     def run(self):
         self.setup_forksvr()
         for trace in self.traces:
             #TODO filter same conditions out of the loop?
+            cur_input = trace.input_content
             for i in range(0,len(trace.conditions)):
                 #TODO make strategy search for more than 1 input, how many?
-                new_input = self.strategy.search(trace, i)
-                (status, cond_stmt_base) = self.forkSrv.run_with_condition(trace.conditions[i].base, new_input)
-                self.process_result(status, cond_stmt_base)
+                for strategy in self.strategies:
+                    for j in range(self.NUMBER_OF_TRIES):
+                        new_input = strategy.search(trace, i, cur_input)
+                        (status, cond_stmt_base) = self.forkSrv.run_with_condition(trace.conditions[i].base, new_input)
+                        is_flipped = self.process_result(status, cond_stmt_base)
+                        if is_flipped:
+                            continue #no need to search for more flips
         self.stop()
 
     def process_result(self, status, cond_stmt_base):
@@ -38,8 +44,7 @@ class Executor:
     def stop(self):
         self.forkSrv.close()
 
-strategy = RandomStrategy()
 executor = Executor()
 executor.import_data('../traces/mini/')
-executor.set_strategy(strategy)
+executor.set_strategies([RandomStrategy()])
 executor.run()
