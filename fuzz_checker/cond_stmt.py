@@ -12,3 +12,8 @@ class CondStmt:
         condStmt.__dict__.update(json)
         condStmt.base = CondStmtBase.fromJson(json['base'])
         return condStmt
+
+    def is_one_byte(self) -> bool:
+        if len(self.offsets) == 1 and self.offsets[0]['end'] - self.offsets[0]['begin'] == 1:
+            return True
+        return False

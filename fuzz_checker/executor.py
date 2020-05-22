@@ -26,16 +26,22 @@ class Executor:
         for trace in self.traces:
             #TODO filter same conditions out of the loop?
             cur_input = trace.input_content
-            for i in range(0,len(trace.conditions)):
+            for i in range(0,trace.getConditionLength()):
                 #TODO make strategy search for more than 1 input, how many?
                 for strategy in self.strategies:
-                    for j in range(self.NUMBER_OF_TRIES):
-                        new_input = strategy.search(trace, i, cur_input)
-                        (status, cond_stmt_base) = self.forkSrv.run_with_condition(trace.conditions[i].base, new_input)
-                        is_flipped = self.process_result(status, cond_stmt_base)
-                        if is_flipped:
-                            continue #no need to search for more flips
+                    try_strategy(strategy)
+                trace.increaseConditionCounter()
         self.stop()
+
+    def try_strategy(self, trace):
+        for j in range(self.NUMBER_OF_TRIES):
+            new_input = strategy.search(trace)
+            if new_input == None:
+                return
+            (status, cond_stmt_base) = self.forkSrv.run_with_condition(trace.getCurrentCondition().base, new_input)
+            is_flipped = strategy.process_result(status, cond_stmt_base, new_input, trace)
+            if is_flipped:
+                return #no need to search for more flips
 
     def process_result(self, status, cond_stmt_base):
         print(status)

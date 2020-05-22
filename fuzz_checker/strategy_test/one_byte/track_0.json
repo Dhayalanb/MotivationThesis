@@ -1,0 +1,1 @@
+[{"base":{"cmpid":3997953793,"context":0,"order":1,"belong":0,"condition":0,"level":0,"op":38,"size":4,"lb1":41,"lb2":0,"arg1":987654320,"arg2":987654320},"offsets":[{"sign":true,"begin":3,"end":4}],"offsets_opt":[],"variables":[],"speed":0,"is_desirable":true,"is_consistent":true,"fuzz_times":0,"state":"Offset","num_minimal_optima":0,"linear":false}]
