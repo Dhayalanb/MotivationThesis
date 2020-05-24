@@ -21,8 +21,11 @@ pub struct CondStmtBase :
 
 import struct
 import defs
+from helpers.utils import Util
 class CondStmtBase:
     FORMAT = "<IIIIIIIIIIQQ" #little endian
+    EPS = 1
+
     def __init__(self):
         self.cmpid = self.order = self.belong = self.condition = self.level = self.op = self. size = self.lb1 = self.lb2 = self.arg1 = self.arg2 = 0
 
@@ -95,6 +98,101 @@ class CondStmtBase:
 
     def is_done(self):
         return self.condition == defs.COND_DONE_ST
-    
 
+
+
+    def get_output(self):
+        a = self.arg1
+        b = self.arg2
+
+        if self.is_signed():
+            a = Util.translate_signed_value(a, self.size)
+            b = Util.translate_signed_value(b, self.size)
+        
+
+        op = self.op & defs.COND_BASIC_MASK
+
+        if op == defs.COND_SW_OP:
+            op = defs.COND_ICMP_EQ_OP
+        
+
+        # if its condition is true, we want its opposite constraint.
+        if self.is_explore() and self.condition == defs.COND_TRUE_ST:
+            op_mapping = {
+                defs.COND_ICMP_EQ_OP : defs.COND_ICMP_NE_OP,
+                defs.COND_ICMP_NE_OP : defs.COND_ICMP_EQ_OP,
+                defs.COND_ICMP_UGT_OP : defs.COND_ICMP_ULE_OP,
+                defs.COND_ICMP_UGE_OP : defs.COND_ICMP_ULT_OP,
+                defs.COND_ICMP_ULT_OP : defs.COND_ICMP_UGE_OP,
+                defs.COND_ICMP_ULE_OP : defs.COND_ICMP_UGT_OP,
+                defs.COND_ICMP_SGT_OP : defs.COND_ICMP_SLE_OP,
+                defs.COND_ICMP_SGE_OP : defs.COND_ICMP_SLT_OP,
+                defs.COND_ICMP_SLT_OP : defs.COND_ICMP_SGE_OP,
+                defs.COND_ICMP_SLE_OP : defs.COND_ICMP_SGT_OP,
+            }
+            if op in op_mapping:
+                op = op_mapping[op]
+            
+        
+
+        # RELU: if f <= 0, we set f = 0.
+        # In other words, if we reach our goal, f = 0.
+
+        if op == defs.COND_ICMP_EQ_OP:
+            # a == b : f = abs(a - b)
+            output = Util.sub_abs(a, b)
+        elif op == defs.COND_ICMP_NE_OP:
+            # a != b :
+            # f = 0 if a != b, and f = 1 if a == b
+            if a == b :
+                output = 1
+            else:
+                output = 0
+        elif op == (defs.COND_ICMP_SGT_OP | defs.COND_ICMP_UGT_OP):
+            # a > b :
+            # f = 0 if a > b, and f = b - a + e if a <= b
+            if a > b:
+                output = 0
+            else:
+                output = b - a + self.EPS
+            
+        elif op == (defs.COND_ICMP_UGE_OP | defs.COND_ICMP_SGE_OP):
+            # a > = b
+            # f = 0 if a >= b, and f = b - a if a < b
+            if a >= b:
+                output = 0
+            else: 
+                output = b - a
+            
+            
+        elif op == (defs.COND_ICMP_ULT_OP | defs.COND_ICMP_SLT_OP):
+            # a < b :
+            # f = 0 if a < b, and f = a - b + e if a >= b
+            if a < b:
+                output = 0
+            else:
+                output = a - b + self.EPS
+                
+            
+        elif op == (defs.COND_ICMP_ULE_OP | defs.COND_ICMP_SLE_OP):
+            # a < = b
+            # f = 0 if a <= b, and f = a - b if a > b
+            if a <= b:
+                output = 0
+            else:
+                output = a - b
+                
+        else:
+            #TODO : support float.
+            # if self.is_float() 
+            output = Util.sub_abs(a, b)
+            
+        
+
+        print(
+            "id: %s, op:  %s-> %s, size:%s, condition: %s, arg(0x:%s 0x:%s), output: %s",
+            self.cmpid, self.op, op, self.size, self.condition, a, b, output
+        )
+
+        return output
     
