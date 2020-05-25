@@ -351,3 +351,4 @@ MigrationBackup/
 .vscode/
 /executor/target/.rustc_info.json
 /executor/Cargo.lock
+forksrv_socket
