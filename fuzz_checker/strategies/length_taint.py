@@ -16,10 +16,10 @@ class LengthTaintStrategy(Strategy):
         size = condition.base.lb2
         delta = condition.base.get_output()
         extended_len = delta * size
-        if delta < 0 or extended_len > defs.MAX_LENGHT:
+        if delta < 0 or extended_len > defs.MAX_INPUT_LENGHT:
             return None
         
-        if len(cur_input) + extended_len < defs.MAX_LENGHT:
+        if len(cur_input) + extended_len < defs.MAX_INPUT_LENGHT:
             # len > X
             input_to_append = b''
             for i in range(extended_len):

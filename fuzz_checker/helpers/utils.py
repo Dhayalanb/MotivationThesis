@@ -42,7 +42,7 @@ class Util:
 
         pos = random.randint(0, len(s) - 1)
         c = s[pos]
-        bit = 1 << random.randint(0, 8)
+        bit = 1 << random.randint(0, 7)
         new_c = bytes([c ^ bit])
         # print("Flipping", bit, "in", repr(c) + ", giving", repr(new_c))
         return s[:pos] + new_c + s[pos + 1:]

@@ -12,9 +12,9 @@ class LengthStrategy(Strategy):
     def search(self, trace: Trace):
         condition = trace.getCurrentCondition()
         input_to_append = b''
-        if self.length >= defs.MAX_LENGHT:
+        if self.length >= defs.MAX_INPUT_LENGHT:
             return None
-        for i in range(length):
+        for i in range(self.length):
             input_to_append = Util.insert_random_character(input_to_append)
         self.length += 100 #To speed this strategy up, use steps of 100 bytes, maybe change to 1 byte at a time for more fine grained results
         return input_to_append
