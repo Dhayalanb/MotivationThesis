@@ -28,6 +28,7 @@ class CondStmtBase:
 
     def __init__(self):
         self.cmpid = self.order = self.belong = self.condition = self.level = self.op = self. size = self.lb1 = self.lb2 = self.arg1 = self.arg2 = 0
+        self.isSkipped = False
 
     @staticmethod
     def getSize() :
