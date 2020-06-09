@@ -4,8 +4,6 @@ from helpers.utils import Util
 import defs
 
 class LengthTaintStrategy(Strategy):
-
-    number_of_runs = 0
     #some special chars: NULL, LF, CR, SPACE
     
     def search(self, trace: Trace):
@@ -26,17 +24,12 @@ class LengthTaintStrategy(Strategy):
             input_to_append = b''
             for i in range(extended_len):
                 input_to_append = Util.insert_random_character(input_to_append)
-            return cur_input + input_to_append
+            self.handler.run(condition, cur_input+input_to_append)
+            return
 
         if len(cur_input) > extended_len:
             # len < X
-            if self.number_of_runs == 0:
-                self.number_of_runs += 1
-                return cur_input[:extended_len]
-            elif self.number_of_runs == 1:
-                self.number_of_runs += 1
-                output = cur_input[:extended_len]
-                output.pop()
-                return output
+            self.handler.run(condition, cur_input[:extended_len])
+            self.handler.run(condition, cur_input[:extended_len-1])
         return None
 

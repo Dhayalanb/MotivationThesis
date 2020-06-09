@@ -35,6 +35,7 @@ class GradientDescentStrategy(Strategy):
         else:
             # We are not changing anything anymore
             # Angora starts using partial gradients here, not pure, skipping
+            # Could also do a repick startpoint
             return None
         return f0
             
