@@ -8,6 +8,8 @@ from strategies.random import RandomStrategy
 from strategies.random_taint import RandomTaintStrategy
 from trace import Trace
 from importer import Importer
+from cond_stmt import CondStmt
+import copy, logging, sys
 
 class TestDoneException(Exception):
     pass
@@ -19,33 +21,46 @@ class TestHandler:
     def __init__(self, values):
         self.valuesToCheck = values
 
-    def run(self, condition, inputValue):
-        print(inputValue)
+    def run(self, condition: CondStmt, inputValue):
+        #print(inputValue)
         if self.runCount >= len(self.valuesToCheck):
             raise TestDoneException
         valueToCompare = self.valuesToCheck[self.runCount]['value']
         compareType = self.valuesToCheck[self.runCount]['compare']
         if 'index' in self.valuesToCheck[self.runCount]:
-            inputValue = inputValue[self.valuesToCheck[self.runCount]['index']]
+            inputValue = bytes([inputValue[self.valuesToCheck[self.runCount]['index']]])
 
         if compareType == 'equal':
             assert(valueToCompare == inputValue)
-        elif compareType == 'lenLess':
-            assert(valueToCompare < len(inputValue))
+        elif compareType == 'notEqual': 
+            assert(valueToCompare != inputValue)
+        elif compareType == 'greater': 
+            assert(valueToCompare > inputValue)
+        elif compareType == 'less': 
+            assert(valueToCompare < inputValue)
         elif compareType == 'lenEqual':
             assert(valueToCompare == len(inputValue))
-        else: 
-            assert(valueToCompare != inputValue)
+        elif compareType == 'lenLess':
+            assert(valueToCompare < len(inputValue))
+        elif compareType == 'lenGrater':
+            assert(valueToCompare > len(inputValue))
         self.runCount += 1
-        return (1, condition)
+        new_base = copy.deepcopy(condition.base)
+        if len(condition.offsets) and len(inputValue) >= condition.offsets[0]['end']:
+            new_base.arg2 = int.from_bytes(inputValue[condition.offsets[0]['begin']:condition.offsets[0]['end']], "little")
+            #print("Value to print", inputValue[condition.offsets[0]['begin']:condition.offsets[0]['end']])
+        return (1, new_base)
 
 class Test:
 
     subfolder = 'strategy_test/'
 
+    def __init__(self):
+        logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+
     def check_one_byte(self, trace: Trace):
         print("Testing one byte strategy")
-        testHandler = TestHandler([{'value':i, 'compare': 'equal', 'index': 3} for i in range(256)])
+        testHandler = TestHandler([{'value':bytes([i]), 'compare': 'equal', 'index': 3} for i in range(256)])
         one_byte = OneByteStrategy(testHandler)
         output = one_byte.search(trace)
         assert(output == None)
@@ -103,8 +118,22 @@ class Test:
         except TestDoneException:
             pass
 
+    def check_gradient_descent(self, trace: Trace):
+        print("Testing gradient descent strategy")
+        testHandler = TestHandler([
+            {'value':b'uesttest', 'compare': 'equal'}, 
+            {'value':b'sesttest', 'compare': 'equal'}, 
+            {'value':b'Hoihoiho', 'compare': 'greater'},
+            {'value':b'Hoihoiho', 'compare': 'greater'},
+            {'value':b'Hoihoiho', 'compare': 'greater'}
+            ])
+        gradient = GradientDescentStrategy(testHandler)
+        output = gradient.search(trace)
+
     def run_all(self):
-        for strategy_to_test in ['length_1', 'length_2', 'magic_1', 'magic_2', 'one_byte', 'random_taint', 'random']:
+        for strategy_to_test in [
+            'length_1', 'length_2', 'magic_1', 'magic_2', 'one_byte', 'random_taint', 'random', 
+            'gradient_descent']:
             importer = Importer(self.subfolder + strategy_to_test +'/')
             trace = importer.get_file_contents()[0]
             function_to_run = getattr(self, 'check_'+strategy_to_test)

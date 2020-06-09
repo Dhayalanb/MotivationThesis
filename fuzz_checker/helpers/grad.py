@@ -9,15 +9,15 @@ class Grad:
 
     def normalize(self):
         # f32::MAX > u64::MAX
-        max_grad = self.max_val()
+        max_grad = self.max_value()
         if max_grad > 0.0:
             for direction in self.directions:
-                direction.percent = defs.GD_MOMENTUM_BETA * direction.percent + (1.0 - defs.GD_MOMENTUM_BETA) * (direction.val / max_grad)
+                direction.percent = defs.GD_MOMENTUM_BETA * direction.percent + (1.0 - defs.GD_MOMENTUM_BETA) * (direction.value / max_grad)
             
         
     
 
-    def max_val(self):
+    def max_value(self):
         return max([direction.value for direction in self.directions])
         
     

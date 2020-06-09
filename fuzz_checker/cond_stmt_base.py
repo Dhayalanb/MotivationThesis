@@ -135,7 +135,6 @@ class CondStmtBase:
                 op = op_mapping[op]
             
         
-
         # RELU: if f <= 0, we set f = 0.
         # In other words, if we reach our goal, f = 0.
 
@@ -191,8 +190,8 @@ class CondStmtBase:
         
 
         print(
-            "id: %s, op:  %s-> %s, size:%s, condition: %s, arg(0x:%s 0x:%s), output: %s",
-            self.cmpid, self.op, op, self.size, self.condition, a, b, output
+            "id: %s, op:  %s-> %s, size:%s, condition: %s, arg(0x:%s 0x:%s), output: %s" % (
+            self.cmpid, self.op, op, self.size, self.condition, a, b, output)
         )
 
         return output
