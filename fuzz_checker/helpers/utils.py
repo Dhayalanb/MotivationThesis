@@ -1,9 +1,10 @@
 import random
 import defs
 
+
 class Util:
 
-    #From https://www.fuzzingbook.org/html/MutationFuzzer.html
+    # From https://www.fuzzingbook.org/html/MutationFuzzer.html
     @staticmethod
     def mutate(s):
         """Return s with a random mutation applied"""
@@ -15,7 +16,7 @@ class Util:
         mutator = random.choice(mutators)
         # print(mutator)
         return mutator(s)
-    
+
     @staticmethod
     def delete_random_character(s):
         """Returns s with a random character deleted"""
@@ -33,7 +34,7 @@ class Util:
         random_character = random.randrange(0, 255)
         # print("Inserting", repr(random_character), "at", pos)
         return s[:pos] + bytes([random_character]) + s[pos:]
-    
+
     @staticmethod
     def flip_random_character(s):
         """Returns s with a random bit flipped in a random position"""
@@ -42,18 +43,31 @@ class Util:
 
         pos = random.randint(0, len(s) - 1)
         c = s[pos]
-        bit = 1 << random.randint(0, 8)
+        bit = 1 << random.randint(0, 7)
         new_c = bytes([c ^ bit])
         # print("Flipping", bit, "in", repr(c) + ", giving", repr(new_c))
         return s[:pos] + new_c + s[pos + 1:]
 
     @staticmethod
     def sub_abs(arg1, arg2):
-        if arg1 < arg2 :
+        if arg1 < arg2:
             return arg2 - arg1
         else:
             return arg1 - arg2
-        
+
+    @staticmethod
+    def updateArray(condition, byte_array: bytes, index: int, direction: bool, delta: int):
+        offset = condition.offsets[index]
+        begin = offset['begin']
+        end = offset['end']
+        sign = offset['sign']
+        bytes_to_update = byte_array[begin:end]
+        size = end - begin
+        if direction:
+            bytes_to_update = ((int.from_bytes(bytes_to_update, "little", signed = sign) + int(delta)) % 2**(8*size)).to_bytes(size, "little", signed = sign)
+        else:
+            bytes_to_update = ((int.from_bytes(bytes_to_update, "little", signed = sign) - int(delta)) % 2**(8*size)).to_bytes(size, "little", signed = sign)
+        return byte_array[:begin] + bytes_to_update + byte_array[end:]
 
     @staticmethod
     def translate_signed_value(v, size):

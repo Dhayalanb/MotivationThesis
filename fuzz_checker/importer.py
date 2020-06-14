@@ -34,9 +34,13 @@ class Importer:
             response.append(CondStmt.fromJson(item))
         return response
 
+    def filterTraces(self, traces: list):
+        #TODO make conditions with occur in multiple files skippable
+        return traces
+
     def get_file_contents(self):
         files = self.get_files()
         response = []
         for (input_file, trace_file) in files:
             response.append(Trace(self.read_input_file(input_file), self.read_fuzz_file(trace_file)))
-        return response
+        return self.filterTraces(response)

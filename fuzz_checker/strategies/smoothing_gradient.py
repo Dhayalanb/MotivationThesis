@@ -1,7 +1,7 @@
 from strategies.strategy import Strategy
 from trace import Trace
 
-class InterestingBytesStrategy(Strategy):
+class SmoothingGradient(Strategy):
     
     def search(self, trace: Trace):
         pass

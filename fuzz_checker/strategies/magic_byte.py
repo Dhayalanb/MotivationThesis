@@ -1,29 +1,28 @@
 from strategies.strategy import Strategy
 from trace import Trace
 from cond_stmt import CondStmt
+import random
 
 class MagicByteStrategy(Strategy):
-    
-    tried_all_offsets = False
-    cur_offset = 0
 
-
-    def get_offset_length(self, condition: CondStmt):
-        offset = condition.offsets[self.cur_offset]
-        return offset['end'] - offset['begin']
+    def place_magic_bytes(self, condition, cur_input, add_one):
+        #TODO make all combinations with offsets?
+        offset_length = len(condition.offsets)
+        for cur_offset in range(offset_length):#loop over different offsets
+            begin = condition.offsets[cur_offset]['begin']
+            end = condition.offsets[cur_offset]['end']
+            for offset in range(begin, end):
+                if len(cur_input) >= offset:
+                    if add_one:
+                        cur_input = cur_input[0: offset] +  bytes([(condition.variables[offset-begin]+1) % 256]) + cur_input[offset + 1:]
+                    else:
+                        cur_input = cur_input[0: offset] +  bytes([condition.variables[offset-begin]]) + cur_input[offset + 1:]
+        return cur_input
 
     def search(self, trace: Trace):
-        if self.tried_all_offsets:
-            return None
-        condition = trace.getCurrentCondition()
-        offset_length = self.get_offset_length(condition)
         cur_input = trace.getInput()
-        if offset_length > 0 and len(cur_input) >= offset_length:
-            for offset in range(condition.offsets[self.cur_offset]['begin'], condition.offsets[self.cur_offset]['end']):
-                cur_input = cur_input[0: offset] +  bytes([condition.variables[offset-condition.offsets[self.cur_offset]['begin']]]) + cur_input[offset + 1:] #TODO check if this works
-                #TODO use signed something?
-                #TODO if equal to magic bytes, check if we should add/sub 1 based on operator 
-        self.cur_offset += 1
-        if self.cur_offset >= len(condition.offsets):
-            self.tried_all_offsets = True
-        return cur_input
+        new_input = self.place_magic_bytes(trace.getCurrentCondition(), cur_input, False)
+        if cur_input == new_input:
+            new_input = self.place_magic_bytes(trace.getCurrentCondition(), cur_input, True)
+        self.handler.run(trace.getCurrentCondition(), new_input)
+        return None

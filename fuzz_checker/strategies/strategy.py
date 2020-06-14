@@ -2,6 +2,11 @@ from trace import Trace
 from cond_stmt_base import CondStmtBase
 
 class Strategy:
+
+    handler = None
+    def __init__(self, handler):
+        self.handler = handler
+
     def search(self, trace: Trace):
         pass
 
