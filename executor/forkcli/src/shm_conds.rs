@@ -97,9 +97,7 @@ lazy_static! {
 
 #[inline(always)]
 pub fn reset_shm_conds() {
-    println!("print works from child!2");
     let mut conds = SHM_CONDS.lock().expect("SHM mutex poisoned.");
-    println!("print works from child!3");
     match conds.deref_mut() {
         &mut Some(ref mut c) => {
             println!("Resetting");

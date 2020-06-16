@@ -23,7 +23,7 @@ class ForkSrv:
         self.sock.listen(1)
         print("Listening")
         self.connection, client_address = self.sock.accept()
-        print('connection from', client_address, file=sys.stderr)
+        print('connection from', client_address)
         #accepted forkcli
     
 
@@ -35,23 +35,23 @@ class ForkSrv:
 
         self.reset_input_file(input_content)
 
-        print("Sending signal")
+        #print("Sending signal")
         self.connection.sendall(bytes('\x01\x01\x01\x01', encoding='utf8'))#signal start
-        print("Sending condStmtBase")
+        #print("Sending condStmtBase")
         self.connection.sendall(condition.toStruct())#send cmpid
-        print("Reveiving pid")
+        #print("Reveiving pid")
         pid = self.connection.recv(4)
-        print('received "%s"', pid)
+        #print('received "%s"', pid)
 
-        print("Reveiving status")
+        #print("Reveiving status")
         status = self.connection.recv(4)
-        print('received "%s"', status)
+        #print('received "%s"', status)
 
-        print("Reveiving compare data")
+        #print("Reveiving compare data")
         cmp_data = self.connection.recv(CondStmtBase.getSize())
-        print('received "%s"', cmp_data)
+        #print('received "%s"', cmp_data)
         receivedCondStmtBase = CondStmtBase.createFromStruct(cmp_data)
-        print(receivedCondStmtBase.__dict__)
+        #print(receivedCondStmtBase.__dict__)
         return (status, receivedCondStmtBase)
 
 

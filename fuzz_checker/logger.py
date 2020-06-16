@@ -1,13 +1,14 @@
 import defs
 import time
-from exceptions.execution_exeptions import MaximumExecptionTimeException, MaximumRunsException
+from cond_stmt import CondStmt
+from cond_stmt_base import CondStmtBase
+from exceptions.execution_exeptions import MaximumExecutionTimeException, MaximumRunsException
 
 class Logger:
 
     result = {}
 
-    def __init__(self, condition: CondStmt, strategy: str):
-        self.condition = condition
+    def __init__(self, strategy: str):
         self.strategy = strategy
         self.result[self.strategy] = {}
         self.result[self.strategy]['input'] = []
@@ -16,12 +17,12 @@ class Logger:
         self.result[self.strategy]['totalTime'] = 0
         self.startTimer()
 
-    def addRun(self, inputValue:bytes):
+    def addRun(self, conditionStmt: CondStmt, inputValue:bytes):
         self.stopTimer() #Always called directly before a run starts
         self.result[self.strategy]['input'].append(inputValue)
         self.result[self.strategy]['nrOfInputs'] += 1
 
-    def addResult(self, status, condition: CondStmtBase):
+    def addResult(self, conditionStmt: CondStmt, status, condition: CondStmtBase):
         self.result[self.strategy]['output'].append((status, condition))
         self.check()
         self.startTimer() #Always called directly after a run
@@ -38,13 +39,19 @@ class Logger:
     def check(self):
         if self.result[self.strategy]['totalTime'] >= defs.MAXIMUM_EXECUTION_TIME:
             self.result[self.strategy]['status'] = defs.MAXIMUM_EXECUTION_TIME_STRING
-            raise MaximumExecptionTimeException('Maximum number of runs obtained')
+            raise MaximumExecutionTimeException('Maximum number of runs obtained')
         if self.result[self.strategy]['nrOfInputs'] >= defs.NUMBER_OF_RUNS:
             self.result[self.strategy]['status'] = defs.MAXIMUM_INPUT_STRING
             raise MaximumRunsException('Maximum number of runs obtained')
 
     def isTiming(self):
         return self.result[self.strategy]['startTime'] != None
+
+    def wrong(self, condition, explanation):
+        return
+
+    def flipped(self, condition, explanation):
+        return
 
     def done(self):
         if self.isTiming():

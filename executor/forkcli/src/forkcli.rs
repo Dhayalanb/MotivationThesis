@@ -30,19 +30,18 @@ pub fn start_forkcli() {
             super::shm_conds::reset_shm_conds();
 
             loop {
-                println!("Waiting for signal");
+                //println!("Waiting for signal");
                 if socket.read(&mut sig_buf).is_err() {
                     eprintln!("exit forkcli");
                     process::exit(0);
                 }
-                println!("Signal received");
-                println!("Waiting for condstmtbase");
+                //println!("Signal received");
+                //println!("Waiting for condstmtbase");
                 let mut cond_stmt_base_buff = vec![0u8; mem::size_of::<CondStmtBase>()];
                 if socket.read(&mut cond_stmt_base_buff).is_err() {
                     eprintln!("exit forkcli");
                     process::exit(0);
                 }
-                println!("Receiving condstmtbase");
                 {
                     let mut conds = super::shm_conds::SHM_CONDS.lock().expect("SHM mutex poisoned.");
                     match conds.deref_mut() {
@@ -58,7 +57,6 @@ pub fn start_forkcli() {
                 let child_pid = unsafe { libc::fork() };
                 
                 if child_pid == 0 {
-                    println!("print works from child!");
                     super::shm_conds::reset_shm_conds();
                     return;
                 }
@@ -67,7 +65,7 @@ pub fn start_forkcli() {
                 pid_buf
                     .write_i32::<LittleEndian>(child_pid)
                     .expect("Could not write to child.");
-                println!("Writing child PID {:?}", pid_buf);
+                //println!("Writing child PID {:?}", pid_buf);
                 if socket.write(&pid_buf).is_err() {
                     process::exit(1);
                 }
@@ -76,12 +74,12 @@ pub fn start_forkcli() {
                 if unsafe { libc::waitpid(child_pid, &mut status as *mut libc::c_int, 0) } < 0 {
                     process::exit(1);
                 }
-                println!("Child terminated");
+                //println!("Child terminated");
                 let mut status_buf = vec![];
                 status_buf
                     .write_i32::<LittleEndian>(status)
                     .expect("Could not write to child.");
-                println!("Writing status {:?}", status);
+                //println!("Writing status {:?}", status);
                 if socket.write(&status_buf).is_err() {
                     process::exit(1);
                 }

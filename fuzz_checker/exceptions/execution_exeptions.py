@@ -1,5 +1,8 @@
 class MaximumRunsException(Exception):
     pass
 
-class MaximumExecptionTimeException(Exception):
+class MaximumExecutionTimeException(Exception):
+    pass
+
+class ConditionFlippedException(Exception):
     pass

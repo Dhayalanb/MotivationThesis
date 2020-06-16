@@ -63,10 +63,20 @@ class Util:
         sign = offset['sign']
         bytes_to_update = byte_array[begin:end]
         size = end - begin
+        int_value = int.from_bytes(bytes_to_update, "little", signed = sign)
         if direction:
-            bytes_to_update = ((int.from_bytes(bytes_to_update, "little", signed = sign) + int(delta)) % 2**(8*size)).to_bytes(size, "little", signed = sign)
+            calculated_value = (int_value + delta)
         else:
-            bytes_to_update = ((int.from_bytes(bytes_to_update, "little", signed = sign) - int(delta)) % 2**(8*size)).to_bytes(size, "little", signed = sign)
+            calculated_value = (int_value - delta)
+        if sign:
+            if calculated_value < (2**(8*size-1)):
+                calculated_value %=  2**(8*size)
+            if calculated_value >= (2**(8*size-1)):
+                calculated_value %= 2**(8*size)
+                calculated_value -= (2**(8*size-1))
+        else:
+            calculated_value %=  2**(8*size)
+        bytes_to_update = calculated_value.to_bytes(size, "little", signed = sign)
         return byte_array[:begin] + bytes_to_update + byte_array[end:]
 
     @staticmethod

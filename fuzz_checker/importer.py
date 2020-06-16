@@ -4,7 +4,7 @@ from cond_stmt import CondStmt
 from trace import Trace
 
 class Importer:
-    INPUT_NAME = "cur_input_"
+    INPUT_NAME = "id_"
 
     def __init__(self, folder):
         self.folder = folder
@@ -13,9 +13,9 @@ class Importer:
         files =  os.listdir(self.folder)
         response = []
         for input_file in files:
-            if self.INPUT_NAME in input_file:
+            if input_file[:len(self.INPUT_NAME)] == self.INPUT_NAME:
                 input_id = input_file[len(self.INPUT_NAME):]
-                response.append((input_file, "track_"+input_id+".json"))
+                response.append((input_file, "track_id_"+input_id+".json"))
         return response
 
     def read_input_file(self, fileLocation):

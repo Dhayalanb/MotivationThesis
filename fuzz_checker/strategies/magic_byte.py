@@ -21,8 +21,9 @@ class MagicByteStrategy(Strategy):
 
     def search(self, trace: Trace):
         cur_input = trace.getInput()
-        new_input = self.place_magic_bytes(trace.getCurrentCondition(), cur_input, False)
+        condition = trace.getCurrentCondition()
+        new_input = self.place_magic_bytes(condition, cur_input, False)
         if cur_input == new_input:
-            new_input = self.place_magic_bytes(trace.getCurrentCondition(), cur_input, True)
-        self.handler.run(trace.getCurrentCondition(), new_input)
+            new_input = self.place_magic_bytes(condition, cur_input, True)
+        self.handler.run(condition, new_input)
         return None

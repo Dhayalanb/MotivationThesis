@@ -84,6 +84,7 @@ class GradientDescentStrategy(Strategy):
             return (True, False, 0)
 
     def repick_start_point(self):
+        #random
         print("Still have to implement this", file=sys.stderr)
         pass
 
@@ -103,6 +104,8 @@ class GradientDescentStrategy(Strategy):
 
     def search(self, trace: Trace):
         condition = trace.getCurrentCondition()
+        if len(condition.offsets) == 0:
+            return None
         grad = Grad(len(condition.offsets))
         self.last_input = trace.getInput()
         epoch = 0
