@@ -27,7 +27,7 @@ class CondStmtBase:
     EPS = 1
 
     def __init__(self):
-        self.cmpid = self.order = self.belong = self.condition = self.level = self.op = self. size = self.lb1 = self.lb2 = self.arg1 = self.arg2 = 0
+        self.cmpid = self.order = self.belong = self.condition = self.level = self.op = self. size = self.lb1 = self.lb2 = self.arg1 = self.arg2 = self.context = 0
         self.isSkipped = False
 
     @staticmethod
@@ -101,6 +101,19 @@ class CondStmtBase:
         return self.condition == defs.COND_DONE_ST
 
 
+    def get_condition_output(self, fast = False):
+        op = self.op & defs.COND_BASIC_MASK
+        if op == defs.COND_SW_OP:
+            return self.arg1 #The condition for a switch is located at arg1
+        if fast:
+            return self.lb1 #From the fast instrumentation, it is located at lb1
+        return self.condition #From the track information it is located at condition for non switch statements
+
+    def isReached(self):
+        return self.lb1 != 2**32-1
+
+    def getLogId(self):
+        return str(self.cmpid) + '_' + str(self.context)
 
     def get_output(self):
         a = self.arg1

@@ -31,18 +31,18 @@ class Executor:
 
     def run(self):
         self.setup_forksvr()
+        handler = Handler(self.forkSrv)
         print("Found %d traces" % len(self.traces))
         for trace in self.traces:
             print("New trace with %d conditions" % len(trace.conditions))
             for i in range(0,trace.getConditionLength()):
-                print(trace.getCurrentCondition().base.__dict__)
-                if trace.getCurrentCondition().isSkipped:
+                #print(trace.getCurrentCondition().base.__dict__)
+                if trace.getCurrentCondition().isSkipped():
                     continue
                 for strategy in self.strategies:
                     #continue
                     print("Trying strategy", strategy.__name__)
-                    handler = Handler(self.forkSrv, strategy.__name__)
-                    strategy_instance = strategy(handler)
+                    strategy_instance = strategy(handler, trace.getCurrentCondition())
                     try:
                         strategy_instance.search(trace)
                     except MaximumExecutionTimeException:
@@ -54,20 +54,18 @@ class Executor:
                         continue
                     handler.done()
                 trace.increaseConditionCounter()
-        self.stop()
-
-    def stop(self):
-        self.forkSrv.close()
+        handler.stop()
+        
 
 executor = Executor()
 executor.import_data('../traces/mini/')
 executor.set_strategies([
     RandomStrategy,
-    #RandomTaintStrategy,
-    #OneByteStrategy,
-    #MagicByteStrategy,
+    RandomTaintStrategy,
+    OneByteStrategy,
+    MagicByteStrategy,
     LengthTaintStrategy,
-    #LengthStrategy,
-    #GradientDescentStrategy,
+    LengthStrategy,
+    GradientDescentStrategy,
     ])
 executor.run()

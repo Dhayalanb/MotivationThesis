@@ -30,6 +30,8 @@ class ForkSrv:
     def reset_input_file(self, input_content):
         self.file_hander.seek(0)
         self.file_hander.write(input_content)
+        self.file_hander.truncate() #old content was still in the file, remove it
+        self.file_hander.seek(0) #set position to read again at the start
 
     def run_with_condition(self, condition, input_content):
 

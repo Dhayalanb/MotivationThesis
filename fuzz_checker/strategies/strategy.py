@@ -1,11 +1,15 @@
 from trace import Trace
 from cond_stmt_base import CondStmtBase
+from handler import Handler
+from cond_stmt import CondStmt
 
 class Strategy:
 
     handler = None
-    def __init__(self, handler):
+    def __init__(self, handler: Handler, condition: CondStmt):
         self.handler = handler
+        self.handler.setStrategy(self.__class__.__name__)
+        self.handler.setCondition(condition)
 
     def search(self, trace: Trace):
         pass

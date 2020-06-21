@@ -23,6 +23,9 @@ class MagicByteStrategy(Strategy):
         cur_input = trace.getInput()
         condition = trace.getCurrentCondition()
         new_input = self.place_magic_bytes(condition, cur_input, False)
+        offset_length = len(condition.offsets)
+        if offset_length == 0:
+            return None
         if cur_input == new_input:
             new_input = self.place_magic_bytes(condition, cur_input, True)
         self.handler.run(condition, new_input)

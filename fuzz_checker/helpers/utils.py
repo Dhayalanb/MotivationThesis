@@ -56,6 +56,15 @@ class Util:
             return arg1 - arg2
 
     @staticmethod
+    def get_signed_value(value, size):
+        if value < -(2**(8*size-1)):
+            value %=  2**(8*size) #-129 becomes 127
+        if value >= (2**(8*size-1)):
+            value %= 2**(8*size)
+            value -= (2**(8*size)) #128 becomes -128
+        return value
+
+    @staticmethod
     def updateArray(condition, byte_array: bytes, index: int, direction: bool, delta: int):
         offset = condition.offsets[index]
         begin = offset['begin']
@@ -63,17 +72,14 @@ class Util:
         sign = offset['sign']
         bytes_to_update = byte_array[begin:end]
         size = end - begin
+        delta = int(delta)
         int_value = int.from_bytes(bytes_to_update, "little", signed = sign)
         if direction:
             calculated_value = (int_value + delta)
         else:
             calculated_value = (int_value - delta)
         if sign:
-            if calculated_value < (2**(8*size-1)):
-                calculated_value %=  2**(8*size)
-            if calculated_value >= (2**(8*size-1)):
-                calculated_value %= 2**(8*size)
-                calculated_value -= (2**(8*size-1))
+            calculated_value = Util.get_signed_value(calculated_value, size)
         else:
             calculated_value %=  2**(8*size)
         bytes_to_update = calculated_value.to_bytes(size, "little", signed = sign)
