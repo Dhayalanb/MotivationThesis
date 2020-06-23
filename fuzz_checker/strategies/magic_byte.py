@@ -25,6 +25,7 @@ class MagicByteStrategy(Strategy):
         new_input = self.place_magic_bytes(condition, cur_input, False)
         offset_length = len(condition.offsets)
         if offset_length == 0:
+            self.handler.logger.wrong(condition, "No offsets")
             return None
         if cur_input == new_input:
             new_input = self.place_magic_bytes(condition, cur_input, True)

@@ -105,6 +105,7 @@ class GradientDescentStrategy(Strategy):
     def search(self, trace: Trace):
         condition = trace.getCurrentCondition()
         if len(condition.offsets) == 0:
+            self.handler.logger.wrong(condition, "No offsets")
             return None
         grad = Grad(len(condition.offsets))
         self.last_input = trace.getInput()

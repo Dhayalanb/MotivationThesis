@@ -13,4 +13,5 @@ class OneByteStrategy(Strategy):
                 self.handler.run(condition, cur_input)
             return None
         else:
+            self.handler.logger.wrong(condition, "No one byte offset")
             return None

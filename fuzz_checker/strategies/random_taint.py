@@ -16,6 +16,7 @@ class RandomTaintStrategy(Strategy):
         offset_len = len(condition.offsets)
         cur_offset = 0
         if offset_len == 0:
+            self.handler.logger.wrong(condition, "No offsets")
             return None
 
         #We know the offset info, randomize first only the bytes in the offset

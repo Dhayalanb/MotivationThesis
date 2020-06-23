@@ -55,6 +55,22 @@ class CondStmtBase:
         condStmtBase.arg2 = data[11]
         return condStmtBase
 
+    def toJson(self):
+        return {
+            'cmpid': self.cmpid,
+            'context': self.context,
+            'order': self.order,
+            'belong': self.belong,
+            'condition': self.condition,
+            'level': self.level,
+            'op': self.op,
+            'size': self.size,
+            'lb1': self.lb1,
+            'lb2': self.lb2,
+            'arg1': self.arg1,
+            'arg2': self.arg2,
+        }
+
     @staticmethod
     def fromJson(json):
         condStmt = CondStmtBase()
@@ -113,7 +129,7 @@ class CondStmtBase:
         return self.lb1 != 2**32-1
 
     def getLogId(self):
-        return str(self.cmpid) + '_' + str(self.context)
+        return str(self.cmpid) + '_' + str(self.context) + '_' +str(self.condition)
 
     def get_output(self):
         a = self.arg1

@@ -10,7 +10,7 @@ class Handler:
 
     def __init__(self, id: int):
         self.forkSrv = self.setupForkServer(id)
-        self.logger = Logger()
+        self.logger = Logger(id)
         self.condition = None
 
     def setupForkServer(self, id):

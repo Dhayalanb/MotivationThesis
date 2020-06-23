@@ -354,3 +354,5 @@ MigrationBackup/
 forksrv_socket
 /build/CMakeFiles
 /build/CMakeCache.txt
+/output
+.gdb_history
