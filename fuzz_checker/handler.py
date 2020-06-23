@@ -8,10 +8,15 @@ from exceptions.execution_exeptions import ConditionFlippedException
 # Is unique per thread
 class Handler:
 
-    def __init__(self, forkSrv: ForkSrv):
-        self.forkSrv = forkSrv
+    def __init__(self, id: int):
+        self.forkSrv = self.setupForkServer(id)
         self.logger = Logger()
         self.condition = None
+
+    def setupForkServer(self, id):
+        server = ForkSrv()
+        server.listen(id)
+        return server
 
     def run(self, condition: CondStmt, inputValue: bytes):
         #print(condition.base.__dict__)

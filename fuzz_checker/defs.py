@@ -68,6 +68,12 @@ COND_FALSE_ST = 0
 COND_TRUE_ST = 1
 COND_DONE_ST = 2
 
+
+# Threading
+NUMBER_OF_THREADS = 4
+BINARY = "../test/mini/mini.fast"
+
+
 I8_MAX = 127
 I16_MAX = 32767
 I32_MAX = 2147483647
