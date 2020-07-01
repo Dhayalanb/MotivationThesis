@@ -129,7 +129,7 @@ class CondStmtBase:
         return self.lb1 != 2**32-1
 
     def getLogId(self):
-        return str(self.cmpid) + '_' + str(self.context) + '_' +str(self.condition)
+        return str(self.cmpid) + '_' + str(self.context) + '_' +str(self.condition) + '_' + str(self.op)
 
     def get_output(self):
         a = self.arg1

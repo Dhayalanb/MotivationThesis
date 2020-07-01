@@ -11,6 +11,7 @@ class OneByteStrategy(Strategy):
                 byte_offset = condition.offsets[0]['begin']
                 cur_input = cur_input[0:byte_offset] + bytes([i]) + cur_input[byte_offset+1:]
                 self.handler.run(condition, cur_input)
+            self.handler.logger.wrong(condition, "Could not find right byte")
             return None
         else:
             self.handler.logger.wrong(condition, "No one byte offset")

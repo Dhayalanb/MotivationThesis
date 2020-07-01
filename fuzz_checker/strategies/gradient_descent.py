@@ -85,6 +85,7 @@ class GradientDescentStrategy(Strategy):
 
     def repick_start_point(self):
         #random
+        #TODO
         print("Still have to implement this", file=sys.stderr)
         pass
 
@@ -116,6 +117,8 @@ class GradientDescentStrategy(Strategy):
             output_value = self.gradient_iteration(output_value, condition, grad)
             if output_value == None:
                 # Not changing input anymore
+                self.handler.logger.wrong(condition, "Stuck in optima")
                 return None
             epoch += 1
+        self.handler.logger.wrong(condition, "Max iterations reached")
         

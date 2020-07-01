@@ -25,11 +25,11 @@ class LengthTaintStrategy(Strategy):
             for i in range(extended_len):
                 input_to_append = Util.insert_random_character(input_to_append)
             self.handler.run(condition, cur_input+input_to_append)
-            return
 
         if len(cur_input) > extended_len:
             # len < X
             self.handler.run(condition, cur_input[:extended_len])
             self.handler.run(condition, cur_input[:extended_len-1])
+        self.handler.logger.wrong(condition, "Could not find right length")
         return None
 

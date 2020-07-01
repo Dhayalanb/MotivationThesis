@@ -30,4 +30,5 @@ class MagicByteStrategy(Strategy):
         if cur_input == new_input:
             new_input = self.place_magic_bytes(condition, cur_input, True)
         self.handler.run(condition, new_input)
+        self.handler.logger.wrong(condition, "Not flipped :(")
         return None

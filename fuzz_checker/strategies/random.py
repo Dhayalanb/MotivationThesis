@@ -18,5 +18,6 @@ class RandomStrategy(Strategy):
                 self.handler.run(condition, cur_input)
                 if not self.reuse_previous:
                     cur_input = trace.getInput()
+        self.handler.logger.wrong(condition, "Not found")
         return None
         

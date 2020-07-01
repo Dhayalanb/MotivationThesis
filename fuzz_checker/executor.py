@@ -75,6 +75,7 @@ class Executor:
             for i in range(0,trace.getConditionLength()):
                 #print(trace.getCurrentCondition().base.__dict__)
                 if trace.getCurrentCondition().isSkipped():
+                    trace.increaseConditionCounter()
                     continue
                 with concurrent.futures.ThreadPoolExecutor(max_workers = defs.NUMBER_OF_THREADS) as thread_executor:
                     print("Calling executor")
