@@ -72,6 +72,8 @@ COND_DONE_ST = 2
 # Threading
 NUMBER_OF_THREADS = 4
 BINARY = "../test/mini/mini.fast"
+CONCOLIC_BINARY = "../test/mini/mini.sym"
+CONCOLIC_TMP_FOLDER = "../test/concolic_tmp/"
 
 
 I8_MAX = 127

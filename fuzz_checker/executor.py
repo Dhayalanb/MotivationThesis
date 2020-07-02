@@ -8,6 +8,7 @@ from strategies.length_taint import LengthTaintStrategy
 from strategies.magic_byte import MagicByteStrategy
 from strategies.one_byte import OneByteStrategy
 from strategies.random_taint import RandomTaintStrategy
+from strategies.concolic import ConcolicStrategy
 from handler import Handler
 from exceptions.execution_exeptions import MaximumExecutionTimeException, MaximumRunsException, ConditionFlippedException
 import copy
@@ -77,7 +78,7 @@ class Executor:
                 if trace.getCurrentCondition().isSkipped():
                     trace.increaseConditionCounter()
                     continue
-                with concurrent.futures.ThreadPoolExecutor(max_workers = defs.NUMBER_OF_THREADS) as thread_executor:
+                with concurrent.futures.ThreadPoolExecutor(max_workers = min(defs.NUMBER_OF_THREADS, len(self.strategies))) as thread_executor:
                     print("Calling executor")
                     results = thread_executor.map(Executor.run_strategy, [(self, strategy, trace) for strategy in self.strategies])
                     for result in results:
@@ -89,12 +90,13 @@ class Executor:
 executor = Executor()
 executor.import_data('../traces/mini/')
 executor.set_strategies([
-    RandomStrategy,
-    RandomTaintStrategy,
-    OneByteStrategy,
-    MagicByteStrategy,
-    LengthTaintStrategy,
-    LengthStrategy,
-    GradientDescentStrategy,
+    #RandomStrategy,
+    #RandomTaintStrategy,
+    #OneByteStrategy,
+    #MagicByteStrategy,
+    #LengthTaintStrategy,
+    #LengthStrategy,
+    #GradientDescentStrategy,
+    ConcolicStrategy
     ])
 executor.run()

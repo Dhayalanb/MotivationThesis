@@ -54,6 +54,12 @@ ANGORA_USE_ASAN=1 USE_FAST=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target
 #USE_TRACK=1 ${bin_dir}/angora-clang ${target}.bc -lz -o ${target}.taint
 echo "Compile Done.."
 
+echo "Compiling symblic version"
+
+${bin_dir}/symcc ${target}.c -o ${target}.sym
+
+echo "Symbolic version compiled"
+
 args_file="./${name}/args"
 if [ ! -f ${args_file} ]; then
     echo "Can't find args file in ${name}!"
