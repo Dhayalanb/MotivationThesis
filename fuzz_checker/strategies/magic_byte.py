@@ -34,7 +34,9 @@ class MagicByteStrategy(Strategy):
         return cur_input
 
     def place_magic_bytes(self, condition, cur_input):
+        orig = cur_input
         for modifier in product(['fill_in', 'arithmatic_1', 'arithmatic_-1'], [False, True]):
+            cur_input = orig
             if modifier[0] == "fill_in":
                 cur_input = self.fill_in(cur_input, condition, modifier[1])
             if modifier[0] == "arithmatic_1":
@@ -42,7 +44,7 @@ class MagicByteStrategy(Strategy):
             if modifier[0] == "arithmatic_-1":
                 cur_input = self.arithmatic(cur_input, condition, modifier[1], -1)
             self.handler.logger.comment(condition.base, modifier[1])
-        self.handler.run(condition, cur_input)
+            self.handler.run(condition, cur_input)
 
     def search(self, trace: Trace, index:int):
         cur_input = trace.getInput()
