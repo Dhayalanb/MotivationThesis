@@ -92,9 +92,11 @@ class GradientDescentStrategy(Strategy):
         reverse = False if self.repick_count %2 == 0 else True
         if self.repick_count == 0 or self.repick_count == 1:
             MagicByteStrategy.fill_in(self.original_input, condition, reverse)
+            self.handler.logger.comment(condition.base, "fill_in_%d" % reverse)
         if self.repick_count == 2 or self.repick_count == 3:
             value = 1 if self.repick_count <= 2 else -1
             MagicByteStrategy.arithmatic(self.original_input, condition, reverse, value)
+            self.handler.logger.comment(condition.base, "arithmatic_%d" % reverse)
             self.last_input = cur_input
             (status, condition_output) = self.handler.run(condition, cur_input)
             return condition_output.get_output()

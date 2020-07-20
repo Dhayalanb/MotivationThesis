@@ -90,13 +90,14 @@ class Executor:
 executor = Executor()
 executor.import_data('../traces/mini/')
 executor.set_strategies([
-    #RandomStrategy,
-    #RandomTaintStrategy,
-    #OneByteStrategy,
+    RandomStrategy,
+    RandomTaintStrategy,
+    OneByteStrategy,
     MagicByteStrategy,
-    #LengthTaintStrategy,
+    LengthTaintStrategy,
     #LengthStrategy,
     GradientDescentStrategy,
-    #ConcolicStrategy
+    ConcolicStrategy
     ])
 executor.run()
+print("Done!\n")

@@ -1,5 +1,6 @@
 from strategies.strategy import Strategy
 from trace import Trace
+import defs
 
 class OneByteStrategy(Strategy):
 

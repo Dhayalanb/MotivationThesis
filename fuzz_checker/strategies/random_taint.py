@@ -20,8 +20,9 @@ class RandomTaintStrategy(Strategy):
             for cur_offset in range(len(condition.offsets)):
                 begin = condition.offsets[cur_offset]['begin']
                 end = condition.offsets[cur_offset]['end']
-                for i in range(random.randrange(defs.MIN_RANDOM_MUTATIONS, defs.MAX_RANDOM_MUTATIONS)):
-                    cur_input = cur_input[:begin] + Util.insert_random_character(bytes([])) + cur_input[end:]
+                for i in range(begin, end):
+                    if len(cur_input) >= i:
+                        cur_input = cur_input[:i] + Util.insert_random_character(bytes([])) + cur_input[i+1:]
             self.handler.run(condition, cur_input)
         self.handler.logger.wrong(condition, defs.COMMENT_TRIED_EVERYTHING)
         return None
