@@ -11,11 +11,11 @@ class Strategy:
         self.handler.setStrategy(self.__class__.__name__)
         self.handler.setCondition(condition)
 
-    def search(self, trace: Trace):
+    def search(self, trace: Trace, index:int):
         pass
 
     def is_flipped(self, trace: Trace, cond_stmt_base: CondStmtBase) -> bool:
-        return trace.getCurrentCondition().condition != cond_stmt_base.condition
+        return trace.getCondition(index).condition != cond_stmt_base.condition
 
     def process_result(self, status: bytes, cond_stmt_base: CondStmtBase, cur_input: bytes, trace: Trace) -> bool:
         return self.is_flipped(trace, cond_stmt_base)

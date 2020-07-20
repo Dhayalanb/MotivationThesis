@@ -1,6 +1,6 @@
 import defs
 import time
-import os, json, base64
+import os, json, base64, logging
 from cond_stmt import CondStmt
 from cond_stmt_base import CondStmtBase
 from exceptions.execution_exeptions import MaximumExecutionTimeException, MaximumRunsException
@@ -12,6 +12,8 @@ class Logger:
     def __init__(self, id):
         self.id = id
         self.condition_counter = 0
+        if os.path.isdir('../output/') and len(os.listdir('../output')) != 0:
+            raise Exception("Output folder not empty!")
 
     def setStrategy(self, strategy: str):
         self.strategy = strategy
@@ -70,7 +72,12 @@ class Logger:
     def wrong(self, conditionStmt: CondStmtBase, explanation: str):
         cond_id = conditionStmt.base.getLogId()
         self.result[self.strategy][cond_id]['status'] = defs.WRONG_STATUS_STRING
-        self.result[self.strategy][cond_id]['wrong'] = explanation
+        self.result[self.strategy][cond_id]['comment'] = explanation
+        return
+
+    def comment(self, conditionStmt: CondStmtBase, comment: str):
+        cond_id = conditionStmt.getLogId()
+        self.result[self.strategy][cond_id]['comment'] = comment
         return
 
     def flipped(self, conditionStmt: CondStmt, explanation):
@@ -103,5 +110,5 @@ class Logger:
                     output_file.write(json.dumps(data_to_write))
 
     def stop(self):
-        print(self.result)
+        logging.info(self.result)
         self.writeData()

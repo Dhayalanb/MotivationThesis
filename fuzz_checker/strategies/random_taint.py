@@ -6,31 +6,23 @@ import defs
 class RandomTaintStrategy(Strategy):
 #This class applies random char insertion, random char deletion and random bitflip to the input a random amount between 1 and 10
 
-    reuse_previous = False
 
-
-    def search(self, trace: Trace):
+    def search(self, trace: Trace, index:int):
         #apply random number of random bitflips to bytes in offset
-        condition = trace.getCurrentCondition()
+        condition = trace.getCondition(index)
         cur_input = trace.getInput()
-        offset_len = len(condition.offsets)
-        cur_offset = 0
-        if offset_len == 0:
-            self.handler.logger.wrong(condition, "No offsets")
+        if len(condition.offsets) == 0:
+            self.handler.logger.wrong(condition, defs.COMMENT_NO_OFFSETS)
             return None
 
         #We know the offset info, randomize first only the bytes in the offset
         while True:
+            for cur_offset in range(len(condition.offsets)):
                 begin = condition.offsets[cur_offset]['begin']
                 end = condition.offsets[cur_offset]['end']
-
                 for i in range(random.randrange(defs.MIN_RANDOM_MUTATIONS, defs.MAX_RANDOM_MUTATIONS)):
-                    cur_input = cur_input[:begin] + Util.flip_random_character(cur_input[begin:end]) + cur_input[end:]
-
-                cur_offset =  (cur_offset + 1) % offset_len #there can be multiple offsets, try every one of them
-                self.handler.run(condition, cur_input)
-                if not self.reuse_previous:
-                    cur_input = trace.getInput()
-        self.handler.logger.wrong(condition, "Not found")
+                    cur_input = cur_input[:begin] + Util.insert_random_character(bytes([])) + cur_input[end:]
+            self.handler.run(condition, cur_input)
+        self.handler.logger.wrong(condition, defs.COMMENT_TRIED_EVERYTHING)
         return None
         

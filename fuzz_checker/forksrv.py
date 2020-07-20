@@ -3,6 +3,7 @@ import sys, os, stat
 from cond_stmt_base import CondStmtBase
 import defs
 import subprocess
+import logging
 
 class ForkSrv:
     sock = None
@@ -27,10 +28,10 @@ class ForkSrv:
         self.input_file = self.input_folder+str(id)+".txt"
         self.file_hander = open(self.input_file, "wb")
         self.sock.listen(1)
-        print("Listening")
+        logging.info("Listening")
         self.run_binary(id)
         self.connection, client_address = self.sock.accept()
-        print('connection from', client_address)
+        logging.debug('connection from', client_address)
         #accepted forkcli
 
     def run_binary(self, id):
@@ -52,28 +53,28 @@ class ForkSrv:
 
         self.reset_input_file(input_content)
 
-        #print("Sending signal")
+        logging.debug("Sending signal")
         self.connection.sendall(bytes('\x01\x01\x01\x01', encoding='utf8'))#signal start
-        #print("Sending condStmtBase")
+        logging.debug("Sending condStmtBase")
         self.connection.sendall(condition.toStruct())#send cmpid
-        #print("Reveiving pid")
+        logging.debug("Reveiving pid")
         pid = self.connection.recv(4)
-        #print('received "%s"', pid)
+        logging.debug('received "%s"', pid)
 
-        #print("Reveiving status")
+        logging.debug("Reveiving status")
         #Make sure program does not execute longer than execution time
         self.connection.settimeout(defs.MAXIMUM_EXECUTION_TIME)
         status = self.connection.recv(4)
-        #print('received "%s"', status)
+        logging.debug('received "%s"', status)
 
-        #print("Reveiving compare data")
+        logging.debug("Reveiving compare data")
         cmp_data = self.connection.recv(CondStmtBase.getSize())
 
         #reset timeout
         self.connection.settimeout(None)
-        #print('received "%s"', cmp_data)
+        logging.debug('received "%s"', cmp_data)
         receivedCondStmtBase = CondStmtBase.createFromStruct(cmp_data)
-        #print(receivedCondStmtBase.__dict__)
+        logging.debug(receivedCondStmtBase.__dict__)
         return (status, receivedCondStmtBase)
 
 

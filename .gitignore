@@ -356,3 +356,5 @@ forksrv_socket
 /build/CMakeCache.txt
 /output
 .gdb_history
+experiments/*
+angora_results/**/*.json

@@ -4,6 +4,7 @@ from cond_stmt_base import CondStmtBase
 from forksrv import ForkSrv
 from exceptions.execution_exeptions import ConditionFlippedException
 from socket import timeout
+import logging
 
 # Class which executes and logs the execution of the fast program
 # Is unique per thread
@@ -32,7 +33,7 @@ class Handler:
             (status, returnedCondition) = (-1, condition)
         self.logger.addResult(condition, status, returnedCondition)
         #print(returnedCondition.__dict__)
-        #print("STATUS: %d" % int.from_bytes(status, "little"))
+        logging.debug("STATUS: %d" % int.from_bytes(status, "little"))
         if not returnedCondition.isReached():
             return (status, returnedCondition)
         if returnedCondition.get_condition_output(True) != condition.base.get_condition_output():

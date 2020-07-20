@@ -1,7 +1,7 @@
 from strategies.strategy import Strategy
 from trace import Trace
 from cond_stmt import CondStmt
-import os, subprocess, defs
+import os, subprocess, defs, logging
 
 class ConcolicStrategy(Strategy):
     
@@ -15,7 +15,7 @@ class ConcolicStrategy(Strategy):
         if len(condition.offsets) > 0:
             symbolic_bytes = list(set([byte for o in condition.offsets for byte in range(o['begin'], o['end'])]))
             new_env['SYMCC_SYMBOLIC_BYTES'] = ",".join(map(str,symbolic_bytes))
-            print(new_env['SYMCC_SYMBOLIC_BYTES'])
+            logging.info(new_env['SYMCC_SYMBOLIC_BYTES'])
         client = subprocess.Popen([defs.CONCOLIC_BINARY, new_env['SYMCC_INPUT_FILE']], env=new_env)
         result = client.wait(defs.MAXIMUM_CONCOLIC_EXECUTION_TIME)
 
@@ -27,23 +27,23 @@ class ConcolicStrategy(Strategy):
             os.remove(defs.CONCOLIC_TMP_FOLDER + 'input')
 
 
-    def search(self, trace: Trace):
+    def search(self, trace: Trace, index:int):
         cur_input = trace.getInput()
-        condition = trace.getCurrentCondition()
+        condition = trace.getCondition(index)
         try:
             self.run_concolic(cur_input, condition)
         except subprocess.TimeoutExpired:
             #executed for maximum time
             pass
         concolic_files = os.listdir(defs.CONCOLIC_TMP_FOLDER + 'output/')
-        print("Generated: %d new inputs" % len(concolic_files))
+        logging.info("Generated: %d new inputs" % len(concolic_files))
         concolic_files.reverse()
         try:
             for new_input_file in concolic_files:
                 if os.path.isfile(defs.CONCOLIC_TMP_FOLDER + 'output/' + new_input_file):
                     with open(defs.CONCOLIC_TMP_FOLDER + 'output/' + new_input_file, 'rb') as new_input:
                         self.handler.run(condition, new_input.read())
-            self.handler.logger.wrong(condition, "No flips found")
+            self.handler.logger.wrong(condition, defs.COMMENT_TRIED_EVERYTHING)
         finally:
             #perform cleanup when done
             self.remove_old_files()

@@ -5,7 +5,7 @@ from trace import Trace
 import base64
 
 class Importer:
-    INPUT_NAME = "id:"
+    INPUT_NAME = "id_"
 
     def __init__(self, folder):
         self.folder = folder
@@ -16,7 +16,7 @@ class Importer:
         for input_file in files:
             if input_file[:len(self.INPUT_NAME)] == self.INPUT_NAME:
                 input_id = input_file[len(self.INPUT_NAME):]
-                response.append((input_file, "track_id:"+input_id+".json"))
+                response.append((input_file, "track_id_"+input_id+".json"))
         return response
 
     def read_input_file(self, fileLocation):

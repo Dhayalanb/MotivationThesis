@@ -21,6 +21,7 @@ pub struct CondStmtBase :
 
 import struct
 import defs
+import logging
 from helpers.utils import Util
 class CondStmtBase:
     FORMAT = "<IIIIIIIIIIQQ" #little endian
@@ -218,7 +219,7 @@ class CondStmtBase:
             
         
 
-        print(
+        logging.info(
             "id: %s, op:  %s-> %s, size:%s, condition: %s, arg(0x:%s 0x:%s), output: %s" % (
             self.cmpid, self.op, op, self.size, self.condition, a, b, output)
         )

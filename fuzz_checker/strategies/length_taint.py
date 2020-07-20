@@ -6,17 +6,17 @@ import defs
 class LengthTaintStrategy(Strategy):
     #some special chars: NULL, LF, CR, SPACE
     
-    def search(self, trace: Trace):
-        condition = trace.getCurrentCondition()
+    def search(self, trace: Trace, index:int):
+        condition = trace.getCondition(index)
         if condition.base.op != defs.COND_LEN_OP:
-            self.handler.logger.wrong(condition, "Wrong statement")
+            self.handler.logger.wrong(condition, defs.COMMENT_WRONG_STATEMENT)
             return None
         cur_input = trace.getInput()
         size = condition.base.lb2
         delta = condition.base.get_output()
         extended_len = delta * size
         if delta < 0 or extended_len > defs.MAX_INPUT_LENGHT:
-            self.handler.logger.wrong(condition, "Wrong length")
+            self.handler.logger.wrong(condition, defs.COMMENT_WRONG_LENGTH)
             return None
         
         if len(cur_input) + extended_len < defs.MAX_INPUT_LENGHT:
@@ -30,6 +30,6 @@ class LengthTaintStrategy(Strategy):
             # len < X
             self.handler.run(condition, cur_input[:extended_len])
             self.handler.run(condition, cur_input[:extended_len-1])
-        self.handler.logger.wrong(condition, "Could not find right length")
+        self.handler.logger.wrong(condition, defs.COMMENT_TRIED_EVERYTHING)
         return None
 

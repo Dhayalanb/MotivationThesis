@@ -6,10 +6,13 @@ from helpers.utils import Util
 import defs
 import sys
 import logging
+from strategies.magic_byte import MagicByteStrategy
 
 class GradientDescentStrategy(Strategy):
     
+    original_input = None
     last_input = None
+    repick_count = 0
 
     #When condition is not reached, return
 
@@ -39,12 +42,12 @@ class GradientDescentStrategy(Strategy):
         logging.debug("vsum: %d", vsum)
         if vsum > 0:
             guess_step = f0 / vsum
-            print("Guess step", guess_step)
+            logging.info("Guess step", guess_step)
             newInput = self.compute_delta_all(condition, grad, guess_step)
             (status, condition_output) = self.handler.run(condition, newInput)
             f_new = condition_output.get_output()
             if f_new < f0:
-                print("found better input: ", newInput)
+                logging.info("found better input: ", newInput)
                 self.last_input = newInput
                 f0 = f_new
         else:
@@ -86,6 +89,15 @@ class GradientDescentStrategy(Strategy):
             return (True, False, 0)
 
     def repick_start_point(self, condition: CondStmt):
+        reverse = False if self.repick_count %2 == 0 else True
+        if self.repick_count == 0 or self.repick_count == 1:
+            MagicByteStrategy.fill_in(self.original_input, condition, reverse)
+        if self.repick_count == 2 or self.repick_count == 3:
+            value = 1 if self.repick_count <= 2 else -1
+            MagicByteStrategy.arithmatic(self.original_input, condition, reverse, value)
+            self.last_input = cur_input
+            (status, condition_output) = self.handler.run(condition, cur_input)
+            return condition_output.get_output()
         #insert random bytes on all offsets
         cur_input = self.last_input
         for cur_offset in range(condition.offsets):
@@ -105,19 +117,21 @@ class GradientDescentStrategy(Strategy):
                 #stuck in local optima
                 return None
             f0 = self.repick_start_point(condition)
+            self.repick_count += 1
             self.calculate_gradient(f0, condition, grad)
             local_optima += 1
         grad.normalize()
         logging.debug("normalized")
         return self.descend(condition, grad, f0)
 
-    def search(self, trace: Trace):
-        condition = trace.getCurrentCondition()
+    def search(self, trace: Trace, index:int):
+        condition = trace.getCondition(index)
         if len(condition.offsets) == 0:
-            self.handler.logger.wrong(condition, "No offsets")
+            self.handler.logger.wrong(condition, defs.COMMENT_NO_OFFSETS)
             return None
         grad = Grad(len(condition.offsets))
         self.last_input = trace.getInput()
+        self.original_input = self.last_input
         epoch = 0
         output_value = condition.base.get_output() #TODO checks on status?
         logging.debug("Original output: %s",output_value)
@@ -125,8 +139,8 @@ class GradientDescentStrategy(Strategy):
             output_value = self.gradient_iteration(output_value, condition, grad)
             if output_value == None:
                 # Not changing input anymore
-                self.handler.logger.wrong(condition, "Stuck in optima")
+                self.handler.logger.wrong(condition, defs.COMMENT_STUCK_IN_OPTIMA)
                 return None
             epoch += 1
-        self.handler.logger.wrong(condition, "Max iterations reached")
+        self.handler.logger.wrong(condition, defs.COMMENT_TRIED_EVERYTHING)
         

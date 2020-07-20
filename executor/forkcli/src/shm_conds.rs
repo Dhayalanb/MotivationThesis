@@ -27,7 +27,7 @@ unsafe impl Send for ShmConds {}
 // Though SHM<T> implement "drop" function, but it won't call (as we want) since ShmConds is in lazy_static!
 impl ShmConds {
     pub fn get_shm() -> Self {
-        println!("Creating new SHM");
+        //println!("Creating new SHM");
         return Self {
             cond : shm::SHM::<CondStmtBase>::new(),
             rt_order : 0,
@@ -100,7 +100,7 @@ pub fn reset_shm_conds() {
     let mut conds = SHM_CONDS.lock().expect("SHM mutex poisoned.");
     match conds.deref_mut() {
         &mut Some(ref mut c) => {
-            println!("Resetting");
+            //println!("Resetting");
             c.reset();
         }
         _ => {println!("ERROR!!!");}

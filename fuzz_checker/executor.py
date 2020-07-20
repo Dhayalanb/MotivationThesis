@@ -14,6 +14,7 @@ from exceptions.execution_exeptions import MaximumExecutionTimeException, Maximu
 import copy
 import defs
 import concurrent.futures
+import logging
 from threading import Condition
 class Executor:
 
@@ -49,41 +50,40 @@ class Executor:
             handler.stop()
 
     @staticmethod
-    def run_strategy(data):
-        (self, strategy, trace) = data
+    def run_condition(data):
+        (self, strategy, trace, index) = data
         handler = self.getHandler()
-        print("Trying strategy", strategy.__name__)
-        strategy_instance = strategy(handler, trace.getCurrentCondition())
+        logging.info("Trying strategy", strategy.__name__)
+        strategy_instance = strategy(handler, trace.getCondition(index))
         try:
-            strategy_instance.search(trace)
+            strategy_instance.search(trace, index)
         except MaximumExecutionTimeException:
-            self.returnHandler(handler)
-            return
+            logging.info("Maximum run time")
+            pass
         except MaximumRunsException:
-            self.returnHandler(handler)
-            return
+            logging.info("Maximum runs")
+            pass
         except ConditionFlippedException:
-            print("Flipped branch!")
+            logging.info("Condition flipped!")
+            pass
+        finally:
             self.returnHandler(handler)
-            return
-        self.returnHandler(handler)
 
     def run(self):
         self.setupHandlers()
-        print("Found %d traces" % len(self.traces))
+        logging.info("Found %d traces" % len(self.traces))
         for trace in self.traces:
-            print("New trace with %d conditions" % len(trace.conditions))
-            for i in range(0,trace.getConditionLength()):
-                #print(trace.getCurrentCondition().base.__dict__)
-                if trace.getCurrentCondition().isSkipped():
-                    trace.increaseConditionCounter()
-                    continue
-                with concurrent.futures.ThreadPoolExecutor(max_workers = min(defs.NUMBER_OF_THREADS, len(self.strategies))) as thread_executor:
-                    print("Calling executor")
-                    results = thread_executor.map(Executor.run_strategy, [(self, strategy, trace) for strategy in self.strategies])
+            logging.info("New trace with %d conditions" % len(trace.conditions))
+            with concurrent.futures.ThreadPoolExecutor(max_workers = min(defs.NUMBER_OF_THREADS, len(self.strategies))) as thread_executor:
+                for i in range(0,trace.getConditionLength()):
+                    #logging.info(trace.getCondition(index).base.__dict__)
+                    if trace.getCondition(i).isSkipped():
+                        trace.increaseConditionCounter()
+                        continue
+                    results = thread_executor.map(Executor.run_condition, [(self, strategy, trace, i) for strategy in self.strategies])
                     for result in results:
-                        print(result)
-                trace.increaseConditionCounter()
+                        result
+                    trace.increaseConditionCounter()
         self.destoyHandlers()
         
 
@@ -93,10 +93,10 @@ executor.set_strategies([
     #RandomStrategy,
     #RandomTaintStrategy,
     #OneByteStrategy,
-    #MagicByteStrategy,
+    MagicByteStrategy,
     #LengthTaintStrategy,
     #LengthStrategy,
-    #GradientDescentStrategy,
-    ConcolicStrategy
+    GradientDescentStrategy,
+    #ConcolicStrategy
     ])
 executor.run()

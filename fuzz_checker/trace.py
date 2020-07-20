@@ -17,3 +17,6 @@ class Trace:
     
     def getCurrentCondition(self) -> CondStmt:
         return self.conditions[self.index]
+
+    def getCondition(self, index: int) -> CondStmt:
+        return self.conditions[index]
