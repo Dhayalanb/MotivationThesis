@@ -72,9 +72,6 @@ COND_DONE_ST = 2
 # Threading
 NUMBER_OF_THREADS = 4
 BINARY = "../test/mini/mini.fast"
-CONCOLIC_BINARY = "../test/mini/mini.sym"
-CONCOLIC_TMP_FOLDER = "../test/concolic_tmp/"
-
 
 I8_MAX = 127
 I16_MAX = 32767
@@ -88,6 +85,11 @@ MAXIMUM_INPUT_STRING = "MAXIMUM_NUMBER_OF_INPUTS_REACHED"
 MAXIMUM_EXECUTION_TIME_STRING = "MAXIMUM_EXECUTION_TIME_REACHED"
 WRONG_STATUS_STRING = "WRONG_STRATEGY"
 FLIPPED_STRING = "FLIPPED_CONDITION"
+
+#concolic
+CONCOLIC_BINARY = "../test/mini/mini.sym"
+CONCOLIC_TMP_FOLDER = "../test/concolic_tmp/"
+MAXIMUM_CONCOLIC_EXECUTION_TIME = MAXIMUM_EXECUTION_TIME-2 #use 2 seconds to try the generated inputs. See how often timeout occurs
 
 #length
 STEP_SIZE_LENGTH = 100

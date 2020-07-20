@@ -11,6 +11,8 @@ class GradientDescentStrategy(Strategy):
     
     last_input = None
 
+    #When condition is not reached, return
+
     def calculate_gradient(self, output_orig, condition: CondStmt, grad: Grad):
         origInput = self.last_input
         max_val = 0
@@ -83,11 +85,17 @@ class GradientDescentStrategy(Strategy):
         if not output_plus < output_orig and not output_min < output_orig:
             return (True, False, 0)
 
-    def repick_start_point(self):
-        #random
-        #TODO
-        print("Still have to implement this", file=sys.stderr)
-        pass
+    def repick_start_point(self, condition: CondStmt):
+        #insert random bytes on all offsets
+        cur_input = self.last_input
+        for cur_offset in range(condition.offsets):
+            begin = condition.offsets[cur_offset]['begin']
+            end = condition.offsets[cur_offset]['end']
+            bytes_to_insert = bytes([]).join([Util.insert_random_character(bytes([])) for i in range(end-begin)])
+            cur_input = cur_input[:begin] + bytes_to_insert + cur_input[end:]
+        self.last_input = cur_input
+        (status, condition_output) = self.handler.run(condition, cur_input)
+        return condition_output.get_output()
 
     def gradient_iteration(self, f0, condition: CondStmt, grad: Grad):
         self.calculate_gradient(f0, condition, grad)
@@ -96,7 +104,7 @@ class GradientDescentStrategy(Strategy):
             if local_optima < defs.MAX_LOCAL_OPTIMA:
                 #stuck in local optima
                 return None
-            f0 = self.repick_start_point()
+            f0 = self.repick_start_point(condition)
             self.calculate_gradient(f0, condition, grad)
             local_optima += 1
         grad.normalize()

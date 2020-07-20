@@ -47,13 +47,13 @@ pub fn start_forkcli() {
                     match conds.deref_mut() {
                         &mut Some(ref mut c) => {
                             c.update_cond_stmt_base(bincode::deserialize(&cond_stmt_base_buff).unwrap());
-                            println!("Condstmt: {:?}", c.get_condition())
+                            //println!("Condstmt: {:?}", c.get_condition())
                         }
                         _ => {}
                     }
                 }
 
-                println!("Forking...");
+                //println!("Forking...");
                 let child_pid = unsafe { libc::fork() };
                 
                 if child_pid == 0 {
@@ -69,7 +69,7 @@ pub fn start_forkcli() {
                 if socket.write(&pid_buf).is_err() {
                     process::exit(1);
                 }
-                println!("Waiting for child");
+                //println!("Waiting for child");
                 let mut status: libc::c_int = 0;
                 if unsafe { libc::waitpid(child_pid, &mut status as *mut libc::c_int, 0) } < 0 {
                     process::exit(1);

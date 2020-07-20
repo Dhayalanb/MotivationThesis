@@ -10,9 +10,11 @@ class ForkSrv:
     connection = None
     input_folder = '../test/input/'
     file_hander = None
+    id = -1
 
     def listen(self, id):
         # Make sure the socket does not already exist
+        self.id = id
         self.server_address = self.server_address + "_" +str(id)
         try:
             os.unlink(self.server_address)
@@ -42,6 +44,10 @@ class ForkSrv:
         self.file_hander.truncate() #old content was still in the file, remove it
         self.file_hander.seek(0) #set position to read again at the start
 
+    def rebind(self):
+        self.close()
+        self.listen(self.id)
+
     def run_with_condition(self, condition, input_content):
 
         self.reset_input_file(input_content)
@@ -55,11 +61,16 @@ class ForkSrv:
         #print('received "%s"', pid)
 
         #print("Reveiving status")
+        #Make sure program does not execute longer than execution time
+        self.connection.settimeout(defs.MAXIMUM_EXECUTION_TIME)
         status = self.connection.recv(4)
         #print('received "%s"', status)
 
         #print("Reveiving compare data")
         cmp_data = self.connection.recv(CondStmtBase.getSize())
+
+        #reset timeout
+        self.connection.settimeout(None)
         #print('received "%s"', cmp_data)
         receivedCondStmtBase = CondStmtBase.createFromStruct(cmp_data)
         #print(receivedCondStmtBase.__dict__)

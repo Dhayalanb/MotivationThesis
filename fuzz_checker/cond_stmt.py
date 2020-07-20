@@ -6,6 +6,7 @@ class CondStmt:
         self.offsets = self.offsets_opt = self.variables = self.speed = self.is_desirable = self.is_consistent = self.fuzz_times = self.state = self.num_minimal_optima = self.linear= 0
         self.base = CondStmtBase
         self.skipping = False
+        self.depth = 0
 
 
     @staticmethod

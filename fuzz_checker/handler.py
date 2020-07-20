@@ -3,6 +3,7 @@ from cond_stmt import CondStmt
 from cond_stmt_base import CondStmtBase
 from forksrv import ForkSrv
 from exceptions.execution_exeptions import ConditionFlippedException
+from socket import timeout
 
 # Class which executes and logs the execution of the fast program
 # Is unique per thread
@@ -23,7 +24,12 @@ class Handler:
         self.logger.addRun(condition, inputValue)
         #print("trying %s" % inputValue)
         condition.base.lb1 = 2**32-1
-        (status, returnedCondition) =  self.forkSrv.run_with_condition(condition.base, inputValue)
+        try:
+            (status, returnedCondition) =  self.forkSrv.run_with_condition(condition.base, inputValue)
+        except timeout:
+            #socket connection timed out. Restart fork server and client
+            self.forkSrv.rebind()
+            (status, returnedCondition) = (-1, condition)
         self.logger.addResult(condition, status, returnedCondition)
         #print(returnedCondition.__dict__)
         #print("STATUS: %d" % int.from_bytes(status, "little"))
