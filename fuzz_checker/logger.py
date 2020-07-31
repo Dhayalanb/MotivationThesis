@@ -7,12 +7,14 @@ from exceptions.execution_exeptions import MaximumExecutionTimeException, Maximu
 
 class Logger:
 
-    result = {}        
+    result = {}    
+
+    output_dir = defs.OUTPUT_DIR    
 
     def __init__(self, id):
         self.id = id
         self.condition_counter = 0
-        if os.path.isdir('../output/') and len(os.listdir('../output')) != 0:
+        if os.path.isdir(self.output_dir) and len(os.listdir(self.output_dir)) != 0:
             raise Exception("Output folder not empty!")
 
     def setStrategy(self, strategy: str):
@@ -94,13 +96,13 @@ class Logger:
         return
 
     def writeData(self):
-        if not os.path.isdir('../output/'):
-            os.mkdir('../output/')
+        if not os.path.isdir(self.output_dir):
+            os.mkdir(self.output_dir)
         for strategy_name in self.result:
-            if not os.path.isdir('../output/'+strategy_name):
-                os.mkdir('../output/'+strategy_name)
+            if not os.path.isdir(self.output_dir+strategy_name):
+                os.mkdir(self.output_dir+strategy_name)
             for condition_name in self.result[strategy_name]:
-                file_name = '../output/'+strategy_name+'/'+condition_name+".json"
+                file_name = self.output_dir+strategy_name+'/'+condition_name+".json"
                 if os.path.isfile(file_name):
                     continue
                 with open(file_name, "w") as output_file:

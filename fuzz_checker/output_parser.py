@@ -23,9 +23,16 @@ class Parser:
     def process_results(self,results):
         for strategy_name in results:
             status_results = {}
+            status_results_comment = {}
             for cmp_id in results[strategy_name]:
                 self.all_condition_ids.add(cmp_id)
                 status = results[strategy_name][cmp_id]['status']
+                if 'comment' in results[strategy_name][cmp_id] and status == defs.FLIPPED_STRING:
+                    comment = results[strategy_name][cmp_id]['comment']
+                    if comment not in status_results_comment:
+                        status_results_comment[comment] = 1
+                    else:
+                        status_results_comment[comment] += 1
                 if status not in status_results:
                     status_results[status] = 1
                 else:
@@ -36,8 +43,14 @@ class Parser:
             total_results = sum(status_results.values())
             for status in status_results:
                 print("%s\t %d\t %d %%" % (status.ljust(40), status_results[status], status_results[status]/total_results*100))
+            total_comments = sum(status_results_comment.values())
+            if total_comments > 0:
+                print("\nSubstrategies:")
+                for comment in status_results_comment:
+                    print("%s\t %d\t %d %%" % (comment.ljust(40), status_results_comment[comment], status_results_comment[comment]/total_comments*100))
             print("\n")
         print("Unique conditions:\t%d\nFlipped conditions:\t%d" % (len(self.all_condition_ids), len(self.flipped_condition_ids)))
+        print("Not flipped conditions:\n")
         print(self.all_condition_ids.difference(self.flipped_condition_ids))
 
     def parse(self, output_folder):

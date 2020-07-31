@@ -11,10 +11,12 @@ from strategies.random_taint import RandomTaintStrategy
 from strategies.concolic import ConcolicStrategy
 from handler import Handler
 from exceptions.execution_exeptions import MaximumExecutionTimeException, MaximumRunsException, ConditionFlippedException
+import defs
 import copy
 import defs
 import concurrent.futures
 import logging
+import sys, getopt
 from threading import Condition
 class Executor:
 
@@ -71,7 +73,9 @@ class Executor:
 
     def run(self):
         self.setupHandlers()
-        logging.info("Found %d traces" % len(self.traces))
+        total_traces = len(self.traces)
+        logging.info("Found %d traces" % total_traces)
+        number_of_traces = 1
         for trace in self.traces:
             logging.info("New trace with %d conditions" % len(trace.conditions))
             with concurrent.futures.ThreadPoolExecutor(max_workers = min(defs.NUMBER_OF_THREADS, len(self.strategies))) as thread_executor:
@@ -84,20 +88,53 @@ class Executor:
                     for result in results:
                         result
                     trace.increaseConditionCounter()
+            print("Running trace %d/%d" % (number_of_traces, total_traces))
+            number_of_traces += 1
         self.destoyHandlers()
         
 
-executor = Executor()
-executor.import_data('../traces/mini/')
-executor.set_strategies([
-    RandomStrategy,
-    RandomTaintStrategy,
-    OneByteStrategy,
-    MagicByteStrategy,
-    LengthTaintStrategy,
-    #LengthStrategy,
-    GradientDescentStrategy,
-    ConcolicStrategy
-    ])
-executor.run()
-print("Done!\n")
+def main(argv):
+    try:
+        opts, args = getopt.getopt(argv,"hb:c:j:o:t:",["binary=","concolic=","threads=","output=", "traces="])
+    except getopt.GetoptError:
+        print('test.py -b <binary> -c <concolic> -j <threads> -o <output> -t <traces>')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print('test.py -b <binary> -c <concolic> -j <threads> -o <output> -t <traces>')
+            sys.exit()
+        elif opt in ("-b", "--binary"):
+            defs.BINARY = arg
+        elif opt in ("-c", "--concolic"):
+            defs.CONCOLIC_BINARY = arg
+        elif opt in ("-j", "--threads"):
+            defs.NUMBER_OF_THREADS = int(arg)
+        elif opt in ("-o", "--output"):
+            defs.OUTPUT_DIR = arg
+        elif opt in ("-t", "--traces"):
+            defs.TRACES_FOLDER = arg
+    print('Binary is ', defs.BINARY)
+    print('Concolic binary is ', defs.CONCOLIC_BINARY)
+    print('Getting traces from ', defs.TRACES_FOLDER)
+    print('Outputting results to ', defs.OUTPUT_DIR)
+    print('Running with threads: ', defs.NUMBER_OF_THREADS)
+    executor = Executor()
+    print("Importing data")
+    executor.import_data(defs.TRACES_FOLDER)
+    print("Data imported!")
+    executor.set_strategies([
+        RandomStrategy,
+        RandomTaintStrategy,
+        OneByteStrategy,
+        MagicByteStrategy,
+        LengthTaintStrategy,
+        #LengthStrategy,
+        GradientDescentStrategy,
+        ConcolicStrategy
+        ])
+    print("Starting run")
+    executor.run()
+    print("Done!\n")
+
+if __name__ == "__main__":
+   main(sys.argv[1:])

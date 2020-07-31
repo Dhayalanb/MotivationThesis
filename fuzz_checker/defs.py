@@ -69,9 +69,17 @@ COND_TRUE_ST = 1
 COND_DONE_ST = 2
 
 
+#Program info
+BINARY = "../test/mini/mini.fast"
+CONCOLIC_BINARY = "../test/mini/mini.sym"
+INPUT_DIR='../test/input/'
+OUTPUT_DIR='../output/'
+TRACES_FOLDER='../traces/mini/'
+
+
 # Threading
 NUMBER_OF_THREADS = 4
-BINARY = "../test/mini/mini.fast"
+
 
 I8_MAX = 127
 I16_MAX = 32767
@@ -98,9 +106,9 @@ COMMENT_WRONG_LENGTH="Wrong length"
 RANDOM_REUSE_PREVIOUS=False
 
 #concolic
-CONCOLIC_BINARY = "../test/mini/mini.sym"
 CONCOLIC_TMP_FOLDER = "../test/concolic_tmp/"
 MAXIMUM_CONCOLIC_EXECUTION_TIME = MAXIMUM_EXECUTION_TIME-2 #use 2 seconds to try the generated inputs. See how often timeout occurs
+SYMCC_LOG_FILE="../test/symcc_output"
 
 #length
 STEP_SIZE_LENGTH = 100

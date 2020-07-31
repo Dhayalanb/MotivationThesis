@@ -35,24 +35,30 @@ class Importer:
             response.append(CondStmt.fromJson(item))
         return response
 
-    def filterTraces(self, traces: list):
-        found_conditions = set()
-        for trace in traces:
-            depth = 0
-            for condition in trace.conditions:
-                condition.depth = depth
-                depth += 1
-                uniqueId = condition.base.getLogId()
-                if uniqueId in found_conditions:
-                    condition.skipping = True
-                else:
-                    found_conditions.add(uniqueId)
+    def filterTraces(self, trace: Trace, found_conditions: set):
+        depth = 0
+        for condition in trace.conditions:
+            condition.depth = depth
+            uniqueId = condition.base.getLogId()
+            if uniqueId in found_conditions:
+                condition.skipping = True
+                del trace.conditions[depth]
+            else:
+                found_conditions.add(uniqueId)
+            depth += 1
         #print(json.dumps(traces, default=lambda o: o.__dict__ if hasattr(o, '__dict__') else json.JSONEncoder.default(self,o) if not isinstance(o,bytes) else str(base64.encodebytes(o))))
-        return traces
+        return trace
 
     def get_file_contents(self):
         files = self.get_files()
         response = []
+        total_files = len(files)
+        number_of_files = 1
+        found_conditions = set()
         for (input_file, trace_file) in files:
-            response.append(Trace(self.read_input_file(input_file), self.read_fuzz_file(trace_file)))
-        return self.filterTraces(response)
+            trace = Trace(self.read_input_file(input_file), self.read_fuzz_file(trace_file))
+            response.append(self.filterTraces(trace, found_conditions))
+            print("Processed %d/%d files" % (number_of_files, total_files))
+            number_of_files +=1
+        print("Found %d unique conditions" % (len(found_conditions)))
+        return response

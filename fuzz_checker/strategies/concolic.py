@@ -16,7 +16,7 @@ class ConcolicStrategy(Strategy):
             symbolic_bytes = list(set([byte for o in condition.offsets for byte in range(o['begin'], o['end'])]))
             new_env['SYMCC_SYMBOLIC_BYTES'] = ",".join(map(str,symbolic_bytes))
             logging.info(new_env['SYMCC_SYMBOLIC_BYTES'])
-        client = subprocess.Popen([defs.CONCOLIC_BINARY, new_env['SYMCC_INPUT_FILE']], env=new_env)
+        client = subprocess.Popen([defs.CONCOLIC_BINARY, new_env['SYMCC_INPUT_FILE']], env=new_env, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
         result = client.wait(defs.MAXIMUM_CONCOLIC_EXECUTION_TIME)
 
     def remove_old_files(self):

@@ -9,7 +9,7 @@ class ForkSrv:
     sock = None
     server_address = '../forksrv_socket'
     connection = None
-    input_folder = '../test/input/'
+    input_folder = defs.INPUT_DIR
     file_hander = None
     id = -1
 
@@ -37,7 +37,7 @@ class ForkSrv:
     def run_binary(self, id):
         new_env = os.environ.copy()
         new_env['ANGORA_FORKSRV_SOCKET_PATH'] = self.server_address
-        self.client = subprocess.Popen([defs.BINARY, self.input_file], env=new_env)
+        self.client = subprocess.Popen([defs.BINARY, self.input_file], env=new_env, stdout=subprocess.DEVNULL)
 
     def reset_input_file(self, input_content):
         self.file_hander.seek(0)
