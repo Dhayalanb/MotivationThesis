@@ -10,9 +10,13 @@ import logging
 # Is unique per thread
 class Handler:
 
-    def __init__(self, id: int):
+    strategy = None
+    id = 0
+
+    def __init__(self, id: int, logger: Logger):
         self.forkSrv = self.setupForkServer(id)
-        self.logger = Logger(id)
+        self.id = id
+        self.logger = logger
         self.condition = None
 
     def setupForkServer(self, id):
@@ -22,38 +26,46 @@ class Handler:
 
     def run(self, condition: CondStmt, inputValue: bytes):
         #print(condition.base.__dict__)
-        self.logger.addRun(condition, inputValue)
+        self.logger.addRun(self.strategy, condition, inputValue)
         #print("trying %s" % inputValue)
         condition.base.lb1 = 2**32-1
         try:
             (status, returnedCondition) =  self.forkSrv.run_with_condition(condition.base, inputValue)
         except timeout:
             #socket connection timed out. Restart fork server and client
+            print("Process timed out, rebinding")
             self.forkSrv.rebind()
             (status, returnedCondition) = (-1, condition)
-        self.logger.addResult(condition, status, returnedCondition)
+        self.logger.addResult(self.strategy, condition, status, returnedCondition)
         #print(returnedCondition.__dict__)
         logging.debug("STATUS: %d" % int.from_bytes(status, "little"))
         if not returnedCondition.isReached():
             return (status, returnedCondition)
         if returnedCondition.get_condition_output(True) != condition.base.get_condition_output():
-            self.logger.flipped(condition, "flipped")
+            self.logger.flipped(self.strategy, condition, "flipped")
             raise ConditionFlippedException
         return (status, returnedCondition)
 
     def setStrategy(self, strategy: str):
-        self.logger.setStrategy(strategy)
+        self.strategy = strategy
+        self.logger.addStrategy(self.strategy)
 
     def setCondition(self, condition: CondStmt):
         self.condition = condition
-        self.logger.addCondition(condition)
+        self.logger.addCondition(self.strategy, condition)
 
     def done(self):
-        self.logger.done(self.condition)
+        self.logger.done(self.strategy, self.condition)
         self.condition = None
 
     def stop(self):
-        self.logger.stop()
         self.forkSrv.close()
+
+
+    def wrong(self, explanation: str):
+        self.logger.wrong(self.strategy, self.condition, explanation)
+
+    def comment(self, comment: str):
+        self.logger.comment(self.strategy, self.condition.base, comment)
 
 

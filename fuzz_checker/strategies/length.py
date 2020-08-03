@@ -17,5 +17,5 @@ class LengthStrategy(Strategy):
                 input_to_append = Util.insert_random_character(input_to_append)
             self.handler.run(condition, input_to_append)
             length += defs.STEP_SIZE_LENGTH #To speed this strategy up, use steps of 100 bytes, maybe change to 1 byte at a time for more fine grained results
-        self.handler.logger.wrong(condition, defs.COMMENT_TRIED_EVERYTHING)
+        self.handler.wrong(defs.COMMENT_TRIED_EVERYTHING)
         return None

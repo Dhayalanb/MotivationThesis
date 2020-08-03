@@ -42,12 +42,12 @@ class GradientDescentStrategy(Strategy):
         logging.debug("vsum: %d", vsum)
         if vsum > 0:
             guess_step = f0 / vsum
-            logging.info("Guess step", guess_step)
+            logging.info("Guess step %d" % guess_step)
             newInput = self.compute_delta_all(condition, grad, guess_step)
             (status, condition_output) = self.handler.run(condition, newInput)
             f_new = condition_output.get_output()
             if f_new < f0:
-                logging.info("found better input: ", newInput)
+                logging.info("found better input: %s" % newInput)
                 self.last_input = newInput
                 f0 = f_new
         else:
@@ -92,11 +92,11 @@ class GradientDescentStrategy(Strategy):
         reverse = False if self.repick_count %2 == 0 else True
         if self.repick_count == 0 or self.repick_count == 1:
             MagicByteStrategy.fill_in(self.original_input, condition, reverse)
-            self.handler.logger.comment(condition.base, "fill_in_%d" % reverse)
+            self.handler.comment("fill_in_%d" % reverse)
         if self.repick_count == 2 or self.repick_count == 3:
             value = 1 if self.repick_count <= 2 else -1
             MagicByteStrategy.arithmatic(self.original_input, condition, reverse, value)
-            self.handler.logger.comment(condition.base, "arithmatic_%d" % reverse)
+            self.handler.comment("arithmatic_%d" % reverse)
             self.last_input = cur_input
             (status, condition_output) = self.handler.run(condition, cur_input)
             return condition_output.get_output()
@@ -129,7 +129,7 @@ class GradientDescentStrategy(Strategy):
     def search(self, trace: Trace, index:int):
         condition = trace.getCondition(index)
         if len(condition.offsets) == 0:
-            self.handler.logger.wrong(condition, defs.COMMENT_NO_OFFSETS)
+            self.handler.wrong(defs.COMMENT_NO_OFFSETS)
             return None
         grad = Grad(len(condition.offsets))
         self.last_input = trace.getInput()
@@ -141,8 +141,8 @@ class GradientDescentStrategy(Strategy):
             output_value = self.gradient_iteration(output_value, condition, grad)
             if output_value == None:
                 # Not changing input anymore
-                self.handler.logger.wrong(condition, defs.COMMENT_STUCK_IN_OPTIMA)
+                self.handler.wrong(defs.COMMENT_STUCK_IN_OPTIMA)
                 return None
             epoch += 1
-        self.handler.logger.wrong(condition, defs.COMMENT_TRIED_EVERYTHING)
+        self.handler.wrong(defs.COMMENT_TRIED_EVERYTHING)
         

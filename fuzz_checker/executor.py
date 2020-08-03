@@ -10,28 +10,35 @@ from strategies.one_byte import OneByteStrategy
 from strategies.random_taint import RandomTaintStrategy
 from strategies.concolic import ConcolicStrategy
 from handler import Handler
+from logger import Logger
 from exceptions.execution_exeptions import MaximumExecutionTimeException, MaximumRunsException, ConditionFlippedException
 import defs
 import copy
 import defs
 import concurrent.futures
 import logging
-import sys, getopt
+import sys, getopt, os
 from threading import Condition
 class Executor:
 
     traces = None
+    total_traces = 0
+    logger = None
+
+    def __init__(self):
+        self.logger = Logger()
 
     def import_data(self, folder):
         importer = Importer(folder)
-        self.traces =  importer.get_file_contents()
+        self.traces =  importer.get_traces_iterator()
+        self.total_traces = importer.get_traces_length()
 
     def set_strategies(self, strategies):
         self.strategies = strategies
 
     def setupHandlers(self):
         self.handlerLock = Condition()
-        self.handlers = [Handler(i) for i in range(defs.NUMBER_OF_THREADS)]
+        self.handlers = [Handler(i, self.logger) for i in range(min(defs.NUMBER_OF_THREADS, len(self.strategies)))]
 
     def getHandler(self):
         self.handlerLock.acquire()
@@ -47,15 +54,18 @@ class Executor:
         self.handlers.append(handler)
         self.handlerLock.release()
 
-    def destoyHandlers(self):
+    def destroyHandlers(self):
         for handler in self.handlers:
             handler.stop()
+        
 
     @staticmethod
     def run_condition(data):
         (self, strategy, trace, index) = data
+        if trace.getCondition(index).isSkipped():
+            return
         handler = self.getHandler()
-        logging.info("Trying strategy", strategy.__name__)
+        logging.info("Trying strategy %s" % strategy.__name__)
         strategy_instance = strategy(handler, trace.getCondition(index))
         try:
             strategy_instance.search(trace, index)
@@ -73,27 +83,22 @@ class Executor:
 
     def run(self):
         self.setupHandlers()
-        total_traces = len(self.traces)
-        logging.info("Found %d traces" % total_traces)
+        logging.info("Found %d traces" % self.total_traces)
         number_of_traces = 1
         for trace in self.traces:
             logging.info("New trace with %d conditions" % len(trace.conditions))
             with concurrent.futures.ThreadPoolExecutor(max_workers = min(defs.NUMBER_OF_THREADS, len(self.strategies))) as thread_executor:
-                for i in range(0,trace.getConditionLength()):
-                    #logging.info(trace.getCondition(index).base.__dict__)
-                    if trace.getCondition(i).isSkipped():
-                        trace.increaseConditionCounter()
-                        continue
-                    results = thread_executor.map(Executor.run_condition, [(self, strategy, trace, i) for strategy in self.strategies])
-                    for result in results:
-                        result
-                    trace.increaseConditionCounter()
-            print("Running trace %d/%d" % (number_of_traces, total_traces))
+                results = thread_executor.map(Executor.run_condition, [(self, strategy, trace, i) for strategy in self.strategies for i in range(0,trace.getConditionLength())])
+                for result in results:
+                    result
+            print("Running trace %d/%d" % (number_of_traces, self.total_traces))
             number_of_traces += 1
-        self.destoyHandlers()
+            self.logger.writeData()
+        self.destroyHandlers()
         
 
 def main(argv):
+    logging.basicConfig(level=os.environ.get("LOGLEVEL", "WARNING"))
     try:
         opts, args = getopt.getopt(argv,"hb:c:j:o:t:",["binary=","concolic=","threads=","output=", "traces="])
     except getopt.GetoptError:

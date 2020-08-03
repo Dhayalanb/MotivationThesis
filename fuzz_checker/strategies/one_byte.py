@@ -12,8 +12,8 @@ class OneByteStrategy(Strategy):
                 byte_offset = condition.offsets[0]['begin']
                 cur_input = cur_input[0:byte_offset] + bytes([i]) + cur_input[byte_offset+1:]
                 self.handler.run(condition, cur_input)
-            self.handler.logger.wrong(condition, defs.COMMENT_TRIED_EVERYTHING)
+            self.handler.wrong(defs.COMMENT_TRIED_EVERYTHING)
             return None
         else:
-            self.handler.logger.wrong(condition, defs.COMMENT_NO_OFFSETS)
+            self.handler.wrong(defs.COMMENT_NO_OFFSETS)
             return None

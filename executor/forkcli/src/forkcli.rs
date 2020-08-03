@@ -19,12 +19,12 @@ pub fn start_forkcli() {
                 },
             };
 
-            socket
+            /*socket
                 .set_read_timeout(Some(Duration::from_secs(config::TIME_LIMIT_TRACK * 2)))
                 .expect("Couldn't set read timeout");
             socket
                 .set_write_timeout(Some(Duration::from_secs(config::TIME_LIMIT_TRACK * 2)))
-                .expect("Couldn't set write timeout");
+                .expect("Couldn't set write timeout");*/
 
             let mut sig_buf = [0; 4];
             super::shm_conds::reset_shm_conds();
@@ -32,14 +32,14 @@ pub fn start_forkcli() {
             loop {
                 //println!("Waiting for signal");
                 if socket.read(&mut sig_buf).is_err() {
-                    eprintln!("exit forkcli");
+                    eprintln!("exit forkcli 1");
                     process::exit(0);
                 }
                 //println!("Signal received");
                 //println!("Waiting for condstmtbase");
                 let mut cond_stmt_base_buff = vec![0u8; mem::size_of::<CondStmtBase>()];
                 if socket.read(&mut cond_stmt_base_buff).is_err() {
-                    eprintln!("exit forkcli");
+                    eprintln!("exit forkcli 2");
                     process::exit(0);
                 }
                 {

@@ -12,7 +12,7 @@ class RandomTaintStrategy(Strategy):
         condition = trace.getCondition(index)
         cur_input = trace.getInput()
         if len(condition.offsets) == 0:
-            self.handler.logger.wrong(condition, defs.COMMENT_NO_OFFSETS)
+            self.handler.wrong(defs.COMMENT_NO_OFFSETS)
             return None
 
         #We know the offset info, randomize first only the bytes in the offset
@@ -24,6 +24,6 @@ class RandomTaintStrategy(Strategy):
                     if len(cur_input) >= i:
                         cur_input = cur_input[:i] + Util.insert_random_character(bytes([])) + cur_input[i+1:]
             self.handler.run(condition, cur_input)
-        self.handler.logger.wrong(condition, defs.COMMENT_TRIED_EVERYTHING)
+        self.handler.wrong(defs.COMMENT_TRIED_EVERYTHING)
         return None
         

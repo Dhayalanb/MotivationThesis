@@ -3,6 +3,7 @@ import time
 import os, json, base64, logging
 from cond_stmt import CondStmt
 from cond_stmt_base import CondStmtBase
+from threading import Condition
 from exceptions.execution_exeptions import MaximumExecutionTimeException, MaximumRunsException
 
 class Logger:
@@ -11,91 +12,102 @@ class Logger:
 
     output_dir = defs.OUTPUT_DIR    
 
-    def __init__(self, id):
-        self.id = id
+    def __init__(self):
         self.condition_counter = 0
+        self.lock = Condition()
         if os.path.isdir(self.output_dir) and len(os.listdir(self.output_dir)) != 0:
             raise Exception("Output folder not empty!")
 
-    def setStrategy(self, strategy: str):
-        self.strategy = strategy
-        if self.strategy not in self.result:
-            self.result[self.strategy] = {}
+    def addStrategy(self, strategy: str):
+        if strategy not in self.result:
+            self.result[strategy] = {}
 
-    def addCondition(self, conditionStmt: CondStmt):
+    def addCondition(self, strategy: str, conditionStmt: CondStmt):
+        self.lock.acquire()
         cond_id = conditionStmt.base.getLogId()
         self.condition_counter += 1
-        if cond_id not in self.result[self.strategy]:
-            self.result[self.strategy][cond_id] = {}
-            self.result[self.strategy][cond_id]['input'] = []
-            self.result[self.strategy][cond_id]['output'] = []
-            self.result[self.strategy][cond_id]['nrOfInputs'] = 0
-            self.result[self.strategy][cond_id]['totalTime'] = 0
+        if cond_id not in self.result[strategy]:
+            self.result[strategy][cond_id] = {}
+            self.result[strategy][cond_id]['input'] = []
+            self.result[strategy][cond_id]['output'] = []
+            self.result[strategy][cond_id]['nrOfInputs'] = 0
+            self.result[strategy][cond_id]['totalTime'] = 0
+            self.result[strategy][cond_id]['depth'] = conditionStmt.depth
         #this is done when a strategy starts executing, start the timer
-        self.startTimer(conditionStmt)
+        self.startTimer(strategy, conditionStmt)
+        self.lock.release()
 
 
 
-    def addRun(self, conditionStmt: CondStmt, inputValue:bytes):
-        self.stopTimer(conditionStmt) #Always called directly before a run starts
+    def addRun(self, strategy: str, conditionStmt: CondStmt, inputValue:bytes):
+        self.lock.acquire()
+        self.stopTimer(strategy, conditionStmt) #Always called directly before a run starts
         cond_id = conditionStmt.base.getLogId()
-        self.result[self.strategy][cond_id]['input'].append(inputValue)
-        self.result[self.strategy][cond_id]['nrOfInputs'] += 1
+        #self.result[strategy][cond_id]['input'].append(inputValue)
+        self.result[strategy][cond_id]['nrOfInputs'] += 1
+        self.lock.release()
 
-    def addResult(self, conditionStmt: CondStmt, status, condition: CondStmtBase):
+    def addResult(self, strategy: str, conditionStmt: CondStmt, status, condition: CondStmtBase):
+        self.lock.acquire()
         cond_id = conditionStmt.base.getLogId()
-        self.result[self.strategy][cond_id]['output'].append((status, condition))
-        self.check(conditionStmt)
-        self.startTimer(conditionStmt) #Always called directly after a run
+        #self.result[strategy][cond_id]['output'].append((status, condition))
+        self.check(strategy, conditionStmt)
+        self.startTimer(strategy, conditionStmt) #Always called directly after a run
+        self.lock.release()
 
-    def startTimer(self, conditionStmt: CondStmt):
-        self.result[self.strategy][conditionStmt.base.getLogId()]['startTime'] = time.time()
+    def startTimer(self, strategy: str, conditionStmt: CondStmt):
+        self.result[strategy][conditionStmt.base.getLogId()]['startTime'] = time.time()
 
-    def stopTimer(self, conditionStmt: CondStmt):
+    def stopTimer(self, strategy: str, conditionStmt: CondStmt):
         cond_id = conditionStmt.base.getLogId()
-        self.result[self.strategy][cond_id]['stopTime'] = time.time()
-        self.result[self.strategy][cond_id]['totalTime'] += self.result[self.strategy][cond_id]['stopTime'] - self.result[self.strategy][cond_id]['startTime']
-        self.result[self.strategy][cond_id]['startTime'] = None
-        self.result[self.strategy][cond_id]['stopTime'] = None
-        self.check(conditionStmt)
+        self.result[strategy][cond_id]['stopTime'] = time.time()
+        self.result[strategy][cond_id]['totalTime'] += self.result[strategy][cond_id]['stopTime'] - self.result[strategy][cond_id]['startTime']
+        self.result[strategy][cond_id]['startTime'] = None
+        self.result[strategy][cond_id]['stopTime'] = None
+        self.check(strategy, conditionStmt)
 
-    def check(self, conditionStmt: CondStmt):
+    def check(self, strategy: str, conditionStmt: CondStmt):
         cond_id = conditionStmt.base.getLogId()
-        if self.result[self.strategy][cond_id]['totalTime'] >= defs.MAXIMUM_EXECUTION_TIME:
-            self.result[self.strategy][cond_id]['status'] = defs.MAXIMUM_EXECUTION_TIME_STRING
+        if self.result[strategy][cond_id]['totalTime'] >= defs.MAXIMUM_EXECUTION_TIME:
+            self.result[strategy][cond_id]['status'] = defs.MAXIMUM_EXECUTION_TIME_STRING
+            self.lock.release()
             raise MaximumExecutionTimeException('Maximum number of runs obtained')
-        if self.result[self.strategy][cond_id]['nrOfInputs'] >= defs.NUMBER_OF_RUNS:
-            self.result[self.strategy][cond_id]['status'] = defs.MAXIMUM_INPUT_STRING
+        if self.result[strategy][cond_id]['nrOfInputs'] >= defs.NUMBER_OF_RUNS:
+            self.result[strategy][cond_id]['status'] = defs.MAXIMUM_INPUT_STRING
+            self.lock.release()
             raise MaximumRunsException('Maximum number of runs obtained')
 
-    def isTiming(self, condition: CondStmt):
-        return self.result[self.strategy][condition.base.getLogId()]['startTime'] != None
+    def isTiming(self, strategy: str, condition: CondStmt):
+        return self.result[strategy][condition.base.getLogId()]['startTime'] != None
 
-    def wrong(self, conditionStmt: CondStmtBase, explanation: str):
+    def wrong(self, strategy: str, conditionStmt: CondStmtBase, explanation: str):
         cond_id = conditionStmt.base.getLogId()
-        self.result[self.strategy][cond_id]['status'] = defs.WRONG_STATUS_STRING
-        self.result[self.strategy][cond_id]['comment'] = explanation
-        return
+        self.lock.acquire()
+        self.result[strategy][cond_id]['status'] = defs.WRONG_STATUS_STRING
+        self.result[strategy][cond_id]['comment'] = explanation
+        self.lock.release()
 
-    def comment(self, conditionStmt: CondStmtBase, comment: str):
+    def comment(self, strategy: str, conditionStmt: CondStmtBase, comment: str):
         cond_id = conditionStmt.getLogId()
-        self.result[self.strategy][cond_id]['comment'] = comment
-        return
+        self.lock.acquire()
+        self.result[strategy][cond_id]['comment'] = comment
+        self.lock.release()
 
-    def flipped(self, conditionStmt: CondStmt, explanation):
+    def flipped(self, strategy: str, conditionStmt: CondStmt, explanation):
         cond_id = conditionStmt.base.getLogId()
-        self.result[self.strategy][cond_id]['status'] = defs.FLIPPED_STRING
-        return
+        self.lock.acquire()
+        self.result[strategy][cond_id]['status'] = defs.FLIPPED_STRING
+        self.lock.release()
 
-    def done(self, condition: CondStmt):
-        if self.isTiming(condition):
-            self.stopTimer(condition)
-        if (self.condition_counter % 1000) == 0:
-            #Every 1000 conditions, write results in case of crash
-            self.writeData()
-        return
+    def done(self, strategy: str, condition: CondStmt):
+        self.lock.acquire()
+        if self.isTiming(strategy, condition):
+            self.stopTimer(strategy, condition)
+        self.lock.release()
 
+    # Call at the end of every trace, in order to prevent too much data in memory. Conditions in traces are unique, so you should never overwrite a file
     def writeData(self):
+        files_written = 0
         if not os.path.isdir(self.output_dir):
             os.mkdir(self.output_dir)
         for strategy_name in self.result:
@@ -107,9 +119,12 @@ class Logger:
                     continue
                 with open(file_name, "w") as output_file:
                     data_to_write = self.result[strategy_name][condition_name]
-                    data_to_write['input'] = list(map(lambda i: str(base64.encodebytes(i)), data_to_write['input']))
-                    data_to_write['output'] = list(map(lambda i: (str(base64.encodebytes(i[0])),i[1].toJson()), data_to_write['output']))
+                    #data_to_write['input'] = list(map(lambda i: str(base64.encodebytes(i)), data_to_write['input']))
+                    #data_to_write['output'] = list(map(lambda i: (str(base64.encodebytes(i[0])),i[1].toJson()), data_to_write['output']))
                     output_file.write(json.dumps(data_to_write))
+                    files_written += 1
+        logging.info("Wrote %d files" % files_written)
+        self.result = {}
 
     def stop(self):
         logging.info(self.result)

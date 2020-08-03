@@ -81,7 +81,7 @@ class MagicByteStrategy(Strategy):
         combinations = self.get_combinations()
         for modifier in combinations:
             cur_input = self.get_modified_output(modifier[0], modifier[1], orig, condition)
-            self.handler.logger.comment(condition.base, modifier[0]+ "_" + str(modifier[1]))
+            self.handler.comment(modifier[0]+ "_" + str(modifier[1]))
             self.handler.run(condition, cur_input)
 
     def search(self, trace: Trace, index:int):
@@ -89,8 +89,8 @@ class MagicByteStrategy(Strategy):
         condition = trace.getCondition(index)
         offset_length = len(condition.offsets)
         if offset_length == 0:
-            self.handler.logger.wrong(condition, defs.COMMENT_NO_OFFSETS)
+            self.handler.wrong(defs.COMMENT_NO_OFFSETS)
             return None
         self.place_magic_bytes(condition, cur_input)
-        self.handler.logger.wrong(condition, defs.COMMENT_TRIED_EVERYTHING)
+        self.handler.wrong(defs.COMMENT_TRIED_EVERYTHING)
         return None

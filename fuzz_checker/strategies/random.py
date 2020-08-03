@@ -17,6 +17,6 @@ class RandomStrategy(Strategy):
                 self.handler.run(condition, cur_input)
                 cur_input = trace.getInput()
                     
-        self.handler.logger.wrong(condition, defs.COMMENT_TRIED_EVERYTHING)
+        self.handler.wrong(defs.COMMENT_TRIED_EVERYTHING)
         return None
         
