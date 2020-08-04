@@ -19,7 +19,11 @@ class ConcolicStrategy(Strategy):
             new_env['SYMCC_SYMBOLIC_BYTES'] = ",".join(map(str,symbolic_bytes))
             logging.info(new_env['SYMCC_SYMBOLIC_BYTES'])
         client = subprocess.Popen([defs.CONCOLIC_BINARY, new_env['SYMCC_INPUT_FILE']], env=new_env, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-        result = client.wait(defs.MAXIMUM_CONCOLIC_EXECUTION_TIME)
+        try:
+            result = client.wait(defs.MAXIMUM_CONCOLIC_EXECUTION_TIME)
+        except subprocess.TimeoutExpired as e:
+            client.kill()
+            raise e
 
     def remove_old_files(self, id):
         for old_file in os.listdir(defs.CONCOLIC_TMP_FOLDER + 'output_'+id + '/'):
@@ -37,6 +41,7 @@ class ConcolicStrategy(Strategy):
             self.run_concolic(cur_input, condition, id)
         except subprocess.TimeoutExpired:
             #executed for maximum time
+            logging.info("Timeout")
             pass
         concolic_files = os.listdir(defs.CONCOLIC_TMP_FOLDER + 'output_'+id + '/')
         logging.info("Generated: %d new inputs" % len(concolic_files))

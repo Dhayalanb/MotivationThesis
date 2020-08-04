@@ -88,7 +88,7 @@ I64_MAX = 9223372036854775807
 
 MAX_INPUT_LENGHT = 10000
 MAXIMUM_EXECUTION_TIME = 10
-NUMBER_OF_RUNS = 10
+NUMBER_OF_RUNS = 1000
 
 #logger
 MAXIMUM_INPUT_STRING = "MAXIMUM_NUMBER_OF_INPUTS_REACHED"
@@ -107,7 +107,7 @@ RANDOM_REUSE_PREVIOUS=False
 
 #concolic
 CONCOLIC_TMP_FOLDER = "../test/concolic_tmp/"
-MAXIMUM_CONCOLIC_EXECUTION_TIME = MAXIMUM_EXECUTION_TIME-2 #use 2 seconds to try the generated inputs. See how often timeout occurs
+MAXIMUM_CONCOLIC_EXECUTION_TIME = MAXIMUM_EXECUTION_TIME-2 #use 2 seconds to try the generated inputs.
 SYMCC_LOG_FILE="../test/symcc_output"
 
 #length

@@ -17,7 +17,7 @@ class MagicByteStrategy(Strategy):
             if reverse:
                 variable_offsets.reverse()
             for offset in range(begin, end):
-                if len(cur_input) >= offset:
+                if len(cur_input) >= offset and offset-begin < len(variable_offsets):
                     value_to_insert = condition.variables[variable_offsets[offset-begin]]
                     if offset == end - 1:
                         value_to_insert = (value_to_insert + value) %256
@@ -35,7 +35,7 @@ class MagicByteStrategy(Strategy):
                 variable_offsets.reverse()
             encoded_bytes_to_insert = bytes([])
             for offset in range(begin, end):
-                if len(cur_input) >= offset:
+                if len(cur_input) >= offset and offset-begin < len(variable_offsets):
                     value_to_insert = encoding(condition.variables[variable_offsets[offset-begin]])
                     encoded_bytes_to_insert = encoded_bytes_to_insert + value_to_insert
             cur_input = cur_input[0: begin] +  encoded_bytes_to_insert + cur_input[end + 1:]

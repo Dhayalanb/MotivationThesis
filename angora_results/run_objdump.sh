@@ -1,1 +1,2 @@
-BUILD_TYPE=release LOG_TYPE=info ./angora_fuzzer -M 0 -A -i ./objdump/input -o objdump/output -j 3 -m llvm -t objdump/objdump.track -- objdump/objdump.fast -x @@
+cd ../fuzz_checker
+pipenv run python ./executor.py -b ../experiments/bin/objdump -c ../experiments/sym/bin/objdump -t ../angora_results/objdump/output/traces/ -o ../angora_results/objdump/results/

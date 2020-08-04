@@ -91,7 +91,7 @@ class GradientDescentStrategy(Strategy):
     def repick_start_point(self, condition: CondStmt):
         reverse = False if self.repick_count %2 == 0 else True
         if self.repick_count == 0 or self.repick_count == 1:
-            MagicByteStrategy.fill_in(self.original_input, condition, reverse)
+            MagicByteStrategy.arithmatic(self.original_input, condition, reverse, 0)
             self.handler.comment("fill_in_%d" % reverse)
         if self.repick_count == 2 or self.repick_count == 3:
             value = 1 if self.repick_count <= 2 else -1

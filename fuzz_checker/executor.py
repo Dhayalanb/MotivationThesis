@@ -38,7 +38,7 @@ class Executor:
 
     def setupHandlers(self):
         self.handlerLock = Condition()
-        self.handlers = [Handler(i, self.logger) for i in range(min(defs.NUMBER_OF_THREADS, len(self.strategies)))]
+        self.handlers = [Handler(i, self.logger) for i in range(defs.NUMBER_OF_THREADS)]
 
     def getHandler(self):
         self.handlerLock.acquire()
@@ -52,6 +52,7 @@ class Executor:
         handler.done()
         self.handlerLock.acquire()
         self.handlers.append(handler)
+        self.handlerLock.notify()
         self.handlerLock.release()
 
     def destroyHandlers(self):
@@ -62,13 +63,12 @@ class Executor:
     @staticmethod
     def run_condition(data):
         (self, strategy, trace, index) = data
-        if trace.getCondition(index).isSkipped():
-            return
         handler = self.getHandler()
-        logging.info("Trying strategy %s" % strategy.__name__)
+        print("Running condition %d/%d with strategy %s and handler %d" % (index, len(trace.conditions), strategy.__name__, handler.id))
         strategy_instance = strategy(handler, trace.getCondition(index))
         try:
             strategy_instance.search(trace, index)
+            handler.done()
         except MaximumExecutionTimeException:
             logging.info("Maximum run time")
             pass
@@ -79,18 +79,26 @@ class Executor:
             logging.info("Condition flipped!")
             pass
         finally:
+            print("Done with condition %d/%d with strategy %s and handler %d" % (index, len(trace.conditions), strategy.__name__, handler.id))
             self.returnHandler(handler)
 
     def run(self):
         self.setupHandlers()
         logging.info("Found %d traces" % self.total_traces)
         number_of_traces = 1
+        seen_conditions = set()
         for trace in self.traces:
             logging.info("New trace with %d conditions" % len(trace.conditions))
-            with concurrent.futures.ThreadPoolExecutor(max_workers = min(defs.NUMBER_OF_THREADS, len(self.strategies))) as thread_executor:
-                results = thread_executor.map(Executor.run_condition, [(self, strategy, trace, i) for strategy in self.strategies for i in range(0,trace.getConditionLength())])
-                for result in results:
-                    result
+            with concurrent.futures.ThreadPoolExecutor(max_workers = defs.NUMBER_OF_THREADS) as thread_executor:
+                results = []
+                for i in range(0,trace.getConditionLength()):
+                    if trace.getCondition(i).isSkipped() or trace.getCondition(i).base.getLogId() in seen_conditions:
+                        continue
+                    results.append(thread_executor.map(Executor.run_condition, [(self, strategy, trace, i) for strategy in self.strategies]))
+                    seen_conditions.add(trace.getCondition(i).base.getLogId())
+            for result in results:
+                for condition in result:
+                    condition
             print("Running trace %d/%d" % (number_of_traces, self.total_traces))
             number_of_traces += 1
             self.logger.writeData()
@@ -98,7 +106,7 @@ class Executor:
         
 
 def main(argv):
-    logging.basicConfig(level=os.environ.get("LOGLEVEL", "WARNING"))
+    logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
     try:
         opts, args = getopt.getopt(argv,"hb:c:j:o:t:",["binary=","concolic=","threads=","output=", "traces="])
     except getopt.GetoptError:
@@ -124,18 +132,17 @@ def main(argv):
     print('Outputting results to ', defs.OUTPUT_DIR)
     print('Running with threads: ', defs.NUMBER_OF_THREADS)
     executor = Executor()
-    print("Importing data")
     executor.import_data(defs.TRACES_FOLDER)
     print("Data imported!")
     executor.set_strategies([
-        RandomStrategy,
-        RandomTaintStrategy,
+        #RandomStrategy,
+        #RandomTaintStrategy,
         OneByteStrategy,
-        MagicByteStrategy,
-        LengthTaintStrategy,
+        #MagicByteStrategy,
+        #LengthTaintStrategy,
         #LengthStrategy,
-        GradientDescentStrategy,
-        ConcolicStrategy
+        #GradientDescentStrategy,
+        #ConcolicStrategy
         ])
     print("Starting run")
     executor.run()

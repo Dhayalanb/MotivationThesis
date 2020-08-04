@@ -31,13 +31,13 @@ class ForkSrv:
         logging.info("Listening")
         self.run_binary(id)
         self.connection, client_address = self.sock.accept()
-        logging.debug('connection from', client_address)
+        logging.debug('connection from %s' % client_address)
         #accepted forkcli
 
     def run_binary(self, id):
         new_env = os.environ.copy()
         new_env['ANGORA_FORKSRV_SOCKET_PATH'] = self.server_address
-        self.client = subprocess.Popen([defs.BINARY, self.input_file], env=new_env, stdout=subprocess.DEVNULL)
+        self.client = subprocess.Popen([defs.BINARY, self.input_file], env=new_env, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
     def reset_input_file(self, input_content):
         self.file_hander.seek(0)

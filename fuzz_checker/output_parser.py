@@ -1,4 +1,4 @@
-import os, json, defs
+import os, json, defs, sys, getopt
 
 class Parser:
 
@@ -51,11 +51,30 @@ class Parser:
             print("\n")
         print("Unique conditions:\t%d\nFlipped conditions:\t%d" % (len(self.all_condition_ids), len(self.flipped_condition_ids)))
         print("Not flipped conditions:\n")
-        print(self.all_condition_ids.difference(self.flipped_condition_ids))
+        #print(self.all_condition_ids.difference(self.flipped_condition_ids))
 
     def parse(self, output_folder):
         result = self.parse_folder(output_folder)
         self.process_results(result)
 
-p = Parser()
-p.parse('../output')
+def main(argv):
+    input_dir = None
+    try:
+        opts, args = getopt.getopt(argv,"hi:",["help","input="])
+    except getopt.GetoptError:
+        print('output_parser.py -i <input_folder>')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print('output_parser.py -i <input_folder>')
+            sys.exit()
+        elif opt in ("-i", "--input"):
+            input_dir = arg
+    if not input_dir:
+        print('output_parser.py -i <input_folder>')
+        sys.exit()
+    p = Parser()
+    p.parse(input_dir)
+
+if __name__ == "__main__":
+   main(sys.argv[1:])

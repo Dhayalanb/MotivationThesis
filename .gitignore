@@ -358,3 +358,6 @@ forksrv_socket
 .gdb_history
 experiments/*
 angora_results/**/*.json
+angora_results/**/id*
+angora_results/**/track*
+

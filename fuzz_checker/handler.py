@@ -56,7 +56,6 @@ class Handler:
 
     def done(self):
         self.logger.done(self.strategy, self.condition)
-        self.condition = None
 
     def stop(self):
         self.forkSrv.close()

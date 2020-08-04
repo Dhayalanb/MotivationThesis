@@ -8,15 +8,14 @@ from exceptions.execution_exeptions import MaximumExecutionTimeException, Maximu
 
 class Logger:
 
-    result = {}    
-
-    output_dir = defs.OUTPUT_DIR    
+    result = {}     
 
     def __init__(self):
         self.condition_counter = 0
         self.lock = Condition()
+        self.output_dir = defs.OUTPUT_DIR   
         if os.path.isdir(self.output_dir) and len(os.listdir(self.output_dir)) != 0:
-            raise Exception("Output folder not empty!")
+            raise Exception("Output folder %s not empty!" % self.output_dir)
 
     def addStrategy(self, strategy: str):
         if strategy not in self.result:
