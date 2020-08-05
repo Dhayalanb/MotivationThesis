@@ -105,7 +105,7 @@ class GradientDescentStrategy(Strategy):
             return condition_output.get_output()
         #insert random bytes on all offsets
         cur_input = self.last_input
-        for cur_offset in range(condition.offsets):
+        for cur_offset in range(len(condition.offsets)):
             begin = condition.offsets[cur_offset]['begin']
             end = condition.offsets[cur_offset]['end']
             bytes_to_insert = bytes([]).join([Util.insert_random_character(bytes([])) for i in range(end-begin)])
