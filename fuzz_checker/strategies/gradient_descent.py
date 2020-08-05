@@ -47,7 +47,7 @@ class GradientDescentStrategy(Strategy):
             (status, condition_output) = self.handler.run(condition, newInput)
             f_new = condition_output.get_output()
             if f_new < f0:
-                logging.info("found better input: %s" % newInput)
+                logging.debug("found better input: %s" % newInput)
                 self.last_input = newInput
                 f0 = f_new
         else:
@@ -74,9 +74,9 @@ class GradientDescentStrategy(Strategy):
         #Add sign, linear, delta
         if output_plus < output_orig and output_min < output_orig:
             if output_min < output_plus:
-                (False, False, output_orig - output_min)
+                return (False, False, output_orig - output_min)
             else:
-                (True, False, output_orig - output_plus)
+                return (True, False, output_orig - output_plus)
         if not output_plus < output_orig and output_min < output_orig:
             return (False, 
             output_plus != output_orig and output_orig - output_min == output_plus - output_orig
@@ -84,21 +84,24 @@ class GradientDescentStrategy(Strategy):
         if output_plus < output_orig and not output_min < output_orig:
             return (True, 
             output_min != output_orig and output_min - output_orig == output_orig - output_plus
-            , output_plus - output_orig)
+            , output_orig - output_plus)
         if not output_plus < output_orig and not output_min < output_orig:
             return (True, False, 0)
 
     def repick_start_point(self, condition: CondStmt):
         reverse = False if self.repick_count %2 == 0 else True
         if self.repick_count == 0 or self.repick_count == 1:
-            MagicByteStrategy.arithmatic(self.original_input, condition, reverse, 0)
+            new_input = MagicByteStrategy.arithmatic(self.original_input, condition, reverse, 0)
             self.handler.comment("fill_in_%d" % reverse)
+            self.last_input = new_input
+            (status, condition_output) = self.handler.run(condition, new_input)
+            return condition_output.get_output()
         if self.repick_count == 2 or self.repick_count == 3:
             value = 1 if self.repick_count <= 2 else -1
-            MagicByteStrategy.arithmatic(self.original_input, condition, reverse, value)
+            new_input = MagicByteStrategy.arithmatic(self.original_input, condition, reverse, value)
             self.handler.comment("arithmatic_%d" % reverse)
-            self.last_input = cur_input
-            (status, condition_output) = self.handler.run(condition, cur_input)
+            self.last_input = new_input
+            (status, condition_output) = self.handler.run(condition, new_input)
             return condition_output.get_output()
         #insert random bytes on all offsets
         cur_input = self.last_input
@@ -115,7 +118,7 @@ class GradientDescentStrategy(Strategy):
         self.calculate_gradient(f0, condition, grad)
         local_optima = 0
         while grad.max_value() == 0:
-            if local_optima < defs.MAX_LOCAL_OPTIMA:
+            if local_optima >= defs.MAX_LOCAL_OPTIMA:
                 #stuck in local optima
                 return None
             f0 = self.repick_start_point(condition)

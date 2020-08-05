@@ -30,6 +30,7 @@ class Logger:
             self.result[strategy][cond_id]['input'] = []
             self.result[strategy][cond_id]['output'] = []
             self.result[strategy][cond_id]['nrOfInputs'] = 0
+            self.result[strategy][cond_id]['nrOfMisses'] = 0
             self.result[strategy][cond_id]['totalTime'] = 0
             self.result[strategy][cond_id]['depth'] = conditionStmt.depth
         #this is done when a strategy starts executing, start the timer
@@ -51,6 +52,8 @@ class Logger:
         cond_id = conditionStmt.base.getLogId()
         #self.result[strategy][cond_id]['output'].append((status, condition))
         self.check(strategy, conditionStmt)
+        if condition.lb1 ==  2**32-1:
+            self.result[strategy][cond_id]['nrOfMisses'] += 1
         self.startTimer(strategy, conditionStmt) #Always called directly after a run
         self.lock.release()
 

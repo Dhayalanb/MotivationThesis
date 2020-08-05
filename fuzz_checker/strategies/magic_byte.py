@@ -9,6 +9,22 @@ import defs
 class MagicByteStrategy(Strategy):
 
     @staticmethod
+    def change_variables(condition, change, reverse):
+        variables = condition.variables
+        size = condition.base.size
+        if len(variables) < size:
+            if len(variables) > 0:
+                variables[0] = (variables[0] + change) % 256
+            return variables
+        variables_sliced = bytes(variables[:size]) if not reverse else bytes(reversed(variables[:size]))
+        value = int.from_bytes(variables_sliced, byteorder='little')
+        value += change
+        value = value % 256**size
+        return value.to_bytes(size, byteorder='little')
+
+
+
+    @staticmethod
     def arithmatic(cur_input, condition, reverse, value):
         for cur_offset in range(len(condition.offsets)):#loop over different offsets
             begin = condition.offsets[cur_offset]['begin']
@@ -16,11 +32,10 @@ class MagicByteStrategy(Strategy):
             variable_offsets = list(range(0, len(condition.variables)))
             if reverse:
                 variable_offsets.reverse()
+            variables = MagicByteStrategy.change_variables(condition, value, reverse)
             for offset in range(begin, end):
                 if len(cur_input) >= offset and offset-begin < len(variable_offsets):
-                    value_to_insert = condition.variables[variable_offsets[offset-begin]]
-                    if offset == end - 1:
-                        value_to_insert = (value_to_insert + value) %256
+                    value_to_insert = variables[variable_offsets[offset-begin]]
                     cur_input = cur_input[0: offset] +  bytes([value_to_insert]) + cur_input[offset + 1:]
         return cur_input
 
@@ -41,6 +56,7 @@ class MagicByteStrategy(Strategy):
             cur_input = cur_input[0: begin] +  encoded_bytes_to_insert + cur_input[end + 1:]
         return cur_input
 
+    @staticmethod
     def zero(cur_input, condition, reverse):
         #reverse to prevent overwriting bytes
         cur_input = MagicByteStrategy.arithmatic(cur_input, condition, reverse, 0)

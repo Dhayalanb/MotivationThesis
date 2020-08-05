@@ -33,6 +33,10 @@ class Parser:
                         status_results_comment[comment] = 1
                     else:
                         status_results_comment[comment] += 1
+                if results[strategy_name][cmp_id]['nrOfInputs'] == 0:
+                    status = defs.NOT_TRIED_STRING
+                elif results[strategy_name][cmp_id]['nrOfInputs'] == results[strategy_name][cmp_id]['nrOfMisses']:
+                    status = defs.MISSED_ALL_STRING
                 if status not in status_results:
                     status_results[status] = 1
                 else:
@@ -50,7 +54,7 @@ class Parser:
                     print("%s\t %d\t %d %%" % (comment.ljust(40), status_results_comment[comment], status_results_comment[comment]/total_comments*100))
             print("\n")
         print("Unique conditions:\t%d\nFlipped conditions:\t%d" % (len(self.all_condition_ids), len(self.flipped_condition_ids)))
-        print("Not flipped conditions:\n")
+        #print("Not flipped conditions:\n")
         #print(self.all_condition_ids.difference(self.flipped_condition_ids))
 
     def parse(self, output_folder):
