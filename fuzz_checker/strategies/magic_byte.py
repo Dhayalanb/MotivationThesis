@@ -29,13 +29,10 @@ class MagicByteStrategy(Strategy):
         for cur_offset in range(len(condition.offsets)):#loop over different offsets
             begin = condition.offsets[cur_offset]['begin']
             end = condition.offsets[cur_offset]['end']
-            variable_offsets = list(range(0, len(condition.variables)))
-            if reverse:
-                variable_offsets.reverse()
             variables = MagicByteStrategy.change_variables(condition, value, reverse)
             for offset in range(begin, end):
-                if len(cur_input) >= offset and offset-begin < len(variable_offsets):
-                    value_to_insert = variables[variable_offsets[offset-begin]]
+                if len(cur_input) >= offset and offset-begin < len(variables):
+                    value_to_insert = variables[offset-begin]
                     cur_input = cur_input[0: offset] +  bytes([value_to_insert]) + cur_input[offset + 1:]
         return cur_input
 
