@@ -135,14 +135,14 @@ def main(argv):
     executor.import_data(defs.TRACES_FOLDER)
     print("Data imported!")
     executor.set_strategies([
-        #RandomStrategy,
-        #RandomTaintStrategy,
+        RandomStrategy,
+        RandomTaintStrategy,
         OneByteStrategy,
-        #MagicByteStrategy,
-        #LengthTaintStrategy,
+        MagicByteStrategy,
+        LengthTaintStrategy,
         #LengthStrategy,
-        #GradientDescentStrategy,
-        #ConcolicStrategy
+        GradientDescentStrategy,
+        ConcolicStrategy
         ])
     print("Starting run")
     executor.run()
