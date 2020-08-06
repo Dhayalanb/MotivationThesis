@@ -75,7 +75,7 @@ CONCOLIC_BINARY = "../test/mini/mini.sym"
 INPUT_DIR='../test/input/'
 OUTPUT_DIR='../output/'
 TRACES_FOLDER='../traces/mini/'
-
+ARGUMENTS=['@@']
 
 # Threading
 NUMBER_OF_THREADS = 4

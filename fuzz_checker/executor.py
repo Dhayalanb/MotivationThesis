@@ -106,15 +106,15 @@ class Executor:
         
 
 def main(argv):
-    logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
+    logging.basicConfig(level=os.environ.get("LOGLEVEL", "WARNING"))
     try:
-        opts, args = getopt.getopt(argv,"hb:c:j:o:t:",["binary=","concolic=","threads=","output=", "traces="])
+        opts, args = getopt.getopt(argv,"hb:c:j:o:t:a:",["help", "binary=","concolic=","threads=","output=", "traces=", "arguments="])
     except getopt.GetoptError:
-        print('test.py -b <binary> -c <concolic> -j <threads> -o <output> -t <traces>')
+        print('test.py -b <binary> -c <concolic> -j <threads> -o <output> -t <traces> -a <arguments>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('test.py -b <binary> -c <concolic> -j <threads> -o <output> -t <traces>')
+            print('test.py -b <binary> -c <concolic> -j <threads> -o <output> -t <traces> -a <arguments>')
             sys.exit()
         elif opt in ("-b", "--binary"):
             defs.BINARY = arg
@@ -126,11 +126,15 @@ def main(argv):
             defs.OUTPUT_DIR = arg
         elif opt in ("-t", "--traces"):
             defs.TRACES_FOLDER = arg
+        elif opt in ("-a", "--arguments"):
+            with open(arg, 'r') as arg_file:
+                defs.ARGUMENTS = arg_file.read().strip().split(' ')
     print('Binary is ', defs.BINARY)
     print('Concolic binary is ', defs.CONCOLIC_BINARY)
     print('Getting traces from ', defs.TRACES_FOLDER)
     print('Outputting results to ', defs.OUTPUT_DIR)
     print('Running with threads: ', defs.NUMBER_OF_THREADS)
+    print('Running with arguments: ', defs.ARGUMENTS)
     executor = Executor()
     executor.import_data(defs.TRACES_FOLDER)
     print("Data imported!")

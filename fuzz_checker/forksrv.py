@@ -37,7 +37,8 @@ class ForkSrv:
     def run_binary(self, id):
         new_env = os.environ.copy()
         new_env['ANGORA_FORKSRV_SOCKET_PATH'] = self.server_address
-        self.client = subprocess.Popen([defs.BINARY, self.input_file], env=new_env, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        arguments = [defs.BINARY] + [self.input_file if arg == '@@' else arg for arg in defs.ARGUMENTS ]
+        self.client = subprocess.Popen(arguments, env=new_env, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
     def reset_input_file(self, input_content):
         self.file_hander.seek(0)

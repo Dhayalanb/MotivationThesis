@@ -33,6 +33,7 @@ class Logger:
             self.result[strategy][cond_id]['nrOfMisses'] = 0
             self.result[strategy][cond_id]['totalTime'] = 0
             self.result[strategy][cond_id]['depth'] = conditionStmt.depth
+            self.result[strategy][cond_id]['offsets'] = conditionStmt.offsets
         #this is done when a strategy starts executing, start the timer
         self.startTimer(strategy, conditionStmt)
         self.lock.release()
