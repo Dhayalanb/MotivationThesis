@@ -15,6 +15,7 @@ class Importer:
 
     def get_files(self):
         files =  os.listdir(self.folder)
+        files.sort()
         response = []
         for input_file in files:
             if input_file[:len(self.INPUT_NAME)] == self.INPUT_NAME:
