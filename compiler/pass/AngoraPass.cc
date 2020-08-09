@@ -24,7 +24,17 @@
 
 using namespace llvm;
 
+//Unfortunately we have to keep this in order to keep the collected context IDS the same :(
+static cl::list<std::string> ClExploitListFiles(
+    "angora-exploitation-list",
+    cl::desc("file listing functions and instructions to exploit"), cl::Hidden);
+
 namespace {
+
+#define MAX_EXPLOIT_CATEGORY 5
+const char *ExploitCategoryAll = "all";
+const char *ExploitCategory[] = {"i0", "i1", "i2", "i3", "i4"};
+const char *CompareFuncCat = "cmpfn";
 
 // hash file name and file size
 u32 hashName(std::string str) {
@@ -117,6 +127,7 @@ public:
   void processCmp(Instruction *Cond, Constant *Cid, Instruction *InsertPoint);
   void processBoolCmp(Value *Cond, Constant *Cid, Instruction *InsertPoint);
   void visitSwitchInst(Module &M, Instruction *Inst);
+  void visitExploitation(Instruction *Inst);
   void processCall(Instruction *Inst);
   void addFnWrap(Function &F);
 };
@@ -273,6 +284,12 @@ void AngoraLLVMPass::initVariables(Module &M) {
       // F->addAttribute(LLVM_ATTRIBUTE_LIST::ReturnIndex, Attribute::ZExt);
       // F->addAttribute(1, Attribute::ZExt);
     }
+
+  std::vector<std::string> AllExploitListFiles;
+  AllExploitListFiles.insert(AllExploitListFiles.end(),
+    ClExploitListFiles.begin(),
+    ClExploitListFiles.end());
+  ExploitList.set(SpecialCaseList::createOrDie(AllExploitListFiles));
 
   gen_id_random = !!getenv(GEN_ID_RANDOM_VAR);
   output_cond_loc = !!getenv(OUTPUT_COND_LOC_VAR);
@@ -431,6 +448,7 @@ void AngoraLLVMPass::addFnWrap(Function &F) {
 void AngoraLLVMPass::processCall(Instruction *Inst) {
   
   visitCompareFunc(Inst);
+  visitExploitation(Inst);
 
   //  if (ABIList.isIn(*Callee, "uninstrumented"))
   //  return;
@@ -461,6 +479,46 @@ void AngoraLLVMPass::visitCallInst(Instruction *Inst) {
   processCall(Inst);
 };
 
+void AngoraLLVMPass::visitExploitation(Instruction *Inst) {
+  // For each instruction and called function.
+  bool exploit_all = ExploitList.isIn(*Inst, ExploitCategoryAll);
+  IRBuilder<> IRB(Inst);
+  int numParams = Inst->getNumOperands();
+  CallInst *Caller = dyn_cast<CallInst>(Inst);
+
+  if (Caller) {
+    numParams = Caller->getNumArgOperands();
+  }
+
+  Value *TypeArg =
+      ConstantInt::get(Int32Ty, COND_EXPLOIT_MASK | Inst->getOpcode());
+
+  for (int i = 0; i < numParams && i < MAX_EXPLOIT_CATEGORY; i++) {
+    if (exploit_all || ExploitList.isIn(*Inst, ExploitCategory[i])) {
+      Value *ParamVal = NULL;
+      if (Caller) {
+        ParamVal = Caller->getArgOperand(i);
+      } else {
+        ParamVal = Inst->getOperand(i);
+      }
+      Type *ParamType = ParamVal->getType();
+      if (ParamType->isIntegerTy() || ParamType->isPointerTy()) {
+        if (!isa<ConstantInt>(ParamVal)) {
+          ConstantInt *Cid = ConstantInt::get(Int32Ty, getInstructionId(Inst));
+          int size = ParamVal->getType()->getScalarSizeInBits() / 8;
+          if (ParamType->isPointerTy()) {
+            size = 8;
+          } else if (!ParamType->isIntegerTy(64)) {
+            ParamVal = IRB.CreateZExt(ParamVal, Int64Ty);
+          }
+          Value *SizeArg = ConstantInt::get(Int32Ty, size);
+        }
+      }
+    }
+  }
+}
+
+
 void AngoraLLVMPass::visitInvokeInst(Instruction *Inst) {
 
   InvokeInst *Caller = dyn_cast<InvokeInst>(Inst);
@@ -475,7 +533,7 @@ void AngoraLLVMPass::visitInvokeInst(Instruction *Inst) {
 }
 
 void AngoraLLVMPass::visitCompareFunc(Instruction *Inst) {
-  if (!isa<CallInst>(Inst)) {
+  if (!isa<CallInst>(Inst) || !ExploitList.isIn(*Inst, CompareFuncCat)) {
     return;
   }
   ConstantInt *Cid = ConstantInt::get(Int32Ty, getInstructionId(Inst));
@@ -682,7 +740,7 @@ bool AngoraLLVMPass::runOnModule(Module &M) {
         } else if (isa<CmpInst>(Inst)) {
           visitCmpInst(Inst);
         } else {
-          //skip
+          visitExploitation(Inst);
         }
       }
     }

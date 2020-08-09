@@ -1,0 +1,1 @@
+install (FILES "exploitation_list.txt" DESTINATION ${ANGORA_RULE_DIR})

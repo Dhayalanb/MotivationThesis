@@ -6,8 +6,10 @@ include_directories(include)
 
 set(ANGORA_BIN_DIR ".")
 set(ANGORA_LIB_DIR "lib")
+set(ANGORA_RULE_DIR "rules")
 set(ANGORA_PASS_DIR "pass")
 
 add_subdirectory(compiler)
 add_subdirectory(pass)
 add_subdirectory(libcxx)
+add_subdirectory(rules)
