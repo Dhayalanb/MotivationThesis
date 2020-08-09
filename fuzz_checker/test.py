@@ -1,5 +1,5 @@
 from forksrv import ForkSrv
-from cond_stmt_base import CondStmtBase
+from importer import Importer
 import logging, os, sys, getopt, defs
 
 
@@ -35,61 +35,20 @@ def main(argv):
     print('Running with threads: ', defs.NUMBER_OF_THREADS)
     print('Running with arguments: ', defs.ARGUMENTS)
     logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
-    condition = CondStmtBase.fromJson({"cmpid":3021181229,"context":257903,"order":65538,"belong":0,"condition":0,"level":0,"op":32771,"size":8,"lb1":0,"lb2":1,"arg1":93990559884295,"arg2":93990559884295})
+    importer = Importer(defs.TRACES_FOLDER)
+    traces = importer.get_traces_iterator()
     server = ForkSrv()
     server.listen(0)
-    server.run_with_condition(condition, bytes('''<definitions name = "HelloService"
-   targetNamespace = "http://www.examples.com/wsdl/HelloService.wsdl"
-   xmlns = "http://schemas.xmlsoap.org/wsdl/"
-   xmlns:soap = "http://schemas.xmlsoap.org/wsdl/soap/"
-   xmlns:tns = "http://www.examples.com/wsdl/HelloService.wsdl"
-   xmlns:xsd = "http://www.w3.org/2001/XMLSchema">
- 
-   <message name = "SayHelloRequest">
-      <part name = "firstName" type = "xsd:string"/>
-   </message>
-	
-   <message name = "SayHelloResponse">
-      <part name = "greeting" type = "xsd:string"/>
-   </message>
-
-   <portType name = "Hello_PortType">
-      <operation name = "sayHello">
-         <input message = "tns:SayHelloRequest"/>
-         <output message = "tns:SayHelloResponse"/>
-      </operation>
-   </portType>
-
-   <binding name = "Hello_Binding" type = "tns:Hello_PortType">
-      <soap:binding style = "rpc"
-         transport = "http://schemas.xmlsoap.org/soap/http"/>
-      <operation name = "sayHello">
-         <soap:operation soapAction = "sayHello"/>
-         <input>
-            <soap:body
-               encodingStyle = "http://schemas.xmlsoap.org/soap/encoding/"
-               namespace = "urn:examples:helloservice"
-               use = "encoded"/>
-         </input>
-		
-         <output>
-            <soap:body
-               encodingStyle = "http://schemas.xmlsoap.org/soap/encoding/"
-               namespace = "urn:examples:helloservice"
-               use = "encoded"/>
-         </output>
-      </operation>
-   </binding>
-
-   <service name = "Hello_Service">
-      <documentation>WSDL File for HelloService</documentation>
-      <port binding = "tns:Hello_Binding" name = "Hello_Port">
-         <soap:address
-            location = "http://www.examples.com/SayHello/" />
-      </port>
-   </service>
-</definitions>
-'''))
+    for trace in traces:
+        (status, result) = server.run_with_condition(trace.getCondition(0).base,trace.getInput())
+        print("%d" % result.lb1)
+        if result.lb1 == 2**32-1:
+            print("First condition not reached!")
+        (status, result) = server.run_with_condition(trace.getCondition(trace.getConditionLength()-1).base,trace.getInput())
+        print("%d" % result.lb1)
+        if result.lb1 == 2**32-1:
+            print("Last not reached!")
+        break
     server.close()
 
 if __name__ == "__main__":
