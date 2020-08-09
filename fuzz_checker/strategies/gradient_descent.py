@@ -111,6 +111,7 @@ class GradientDescentStrategy(Strategy):
             bytes_to_insert = bytes([]).join([Util.insert_random_character(bytes([])) for i in range(end-begin)])
             cur_input = cur_input[:begin] + bytes_to_insert + cur_input[end:]
         self.last_input = cur_input
+        self.handler.comment("random")
         (status, condition_output) = self.handler.run(condition, cur_input)
         return condition_output.get_output()
 
