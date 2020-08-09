@@ -57,10 +57,8 @@ class Util:
 
     @staticmethod
     def get_signed_value(value, size):
-        if value < -(2**(8*size-1)):
-            value %=  2**(8*size) #-129 becomes 127
+        value %= 2**(8*size) #-129 becomes 127
         if value >= (2**(8*size-1)):
-            value %= 2**(8*size)
             value -= (2**(8*size)) #128 becomes -128
         return value
 
