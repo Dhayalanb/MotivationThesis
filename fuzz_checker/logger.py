@@ -92,7 +92,7 @@ class Logger:
     def flipped(self, strategy: str, conditionStmt: CondStmt, explanation):
         cond_id = conditionStmt.base.getLogId()
         with self.lock:
-            self.result[stategy][cond_id]['status'] = defs.FLIPPED_STRING
+            self.result[strategy][cond_id]['status'] = defs.FLIPPED_STRING
 
     def done(self, strategy: str, condition: CondStmt):
         with self.lock:
