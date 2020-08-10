@@ -1,5 +1,5 @@
 import socket
-import sys, os, stat
+import sys, os, stat, signal
 from cond_stmt_base import CondStmtBase
 import defs
 import subprocess
@@ -16,7 +16,7 @@ class ForkSrv:
     def listen(self, id):
         # Make sure the socket does not already exist
         self.id = id
-        self.server_address = self.server_address + "_" +str(id)
+        self.server_address = "../forksrv_socket" + "_" +str(id)
         try:
             os.unlink(self.server_address)
         except OSError:
@@ -28,10 +28,10 @@ class ForkSrv:
         self.input_file = self.input_folder+str(id)+".txt"
         self.file_hander = open(self.input_file, "wb")
         self.sock.listen(1)
-        logging.info("Listening")
+        logging.warning("Listening")
         self.run_binary(id)
         self.connection, client_address = self.sock.accept()
-        logging.debug('connection from %s' % client_address)
+        logging.warning('connection from %s' % client_address)
         #accepted forkcli
 
     def run_binary(self, id):
@@ -65,7 +65,17 @@ class ForkSrv:
         logging.debug("Reveiving status")
         #Make sure program does not execute longer than execution time
         self.connection.settimeout(defs.MAXIMUM_EXECUTION_TIME)
-        status = self.connection.recv(4)
+        try:
+            status = self.connection.recv(4)
+        except socket.timeout as e:
+            #kill child process of fork client, kill client later
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except OSError as err:
+                #Happens is child already ended between these lines
+                pass
+            #give exception to handler
+            raise e
         logging.debug('received "%s"', status)
 
         logging.debug("Reveiving compare data")
