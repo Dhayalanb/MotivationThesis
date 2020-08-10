@@ -28,10 +28,10 @@ class ForkSrv:
         self.input_file = self.input_folder+str(id)+".txt"
         self.file_hander = open(self.input_file, "wb")
         self.sock.listen(1)
-        logging.warning("Listening")
+        logging.warning("Listening %d" % self.id)
         self.run_binary(id)
         self.connection, client_address = self.sock.accept()
-        logging.warning('connection from %s' % client_address)
+        logging.warning('connection from %s at %d' % (client_address, self.id))
         #accepted forkcli
 
     def run_binary(self, id):
@@ -58,7 +58,7 @@ class ForkSrv:
         self.connection.sendall(bytes('\x01\x01\x01\x01', encoding='utf8'))#signal start
         logging.debug("Sending condStmtBase")
         self.connection.sendall(condition.toStruct())#send cmpid
-        logging.debug("Reveiving pid")
+        logging.debug("Receiving pid")
         pid = self.connection.recv(4)
         logging.debug('received "%s"', pid)
 
@@ -67,25 +67,25 @@ class ForkSrv:
         self.connection.settimeout(defs.MAXIMUM_EXECUTION_TIME)
         try:
             status = self.connection.recv(4)
+            logging.debug('received "%s"', status)
+
+            logging.debug("Receiving compare data")
+            cmp_data = self.connection.recv(CondStmtBase.getSize())
         except socket.timeout as e:
             #kill child process of fork client, kill client later
             try:
                 os.kill(pid, signal.SIGKILL)
             except OSError as err:
                 #Happens is child already ended between these lines
+                logging.warn("Could not kill child")
                 pass
             #give exception to handler
             raise e
-        logging.debug('received "%s"', status)
-
-        logging.debug("Reveiving compare data")
-        cmp_data = self.connection.recv(CondStmtBase.getSize())
-
         #reset timeout
         self.connection.settimeout(None)
-        logging.debug('received "%s"', cmp_data)
+        #logging.debug('received "%s"', cmp_data)
         receivedCondStmtBase = CondStmtBase.createFromStruct(cmp_data)
-        logging.debug(receivedCondStmtBase.__dict__)
+        #logging.debug(receivedCondStmtBase.__dict__)
         return (status, receivedCondStmtBase)
 
 

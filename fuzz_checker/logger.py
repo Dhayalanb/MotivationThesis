@@ -3,7 +3,7 @@ import time
 import os, json, base64, logging
 from cond_stmt import CondStmt
 from cond_stmt_base import CondStmtBase
-from threading import Condition
+from threading import RLock
 from exceptions.execution_exeptions import MaximumExecutionTimeException, MaximumRunsException
 
 class Logger:
@@ -12,51 +12,48 @@ class Logger:
 
     def __init__(self):
         self.condition_counter = 0
-        self.lock = Condition()
+        self.lock = RLock()
         self.output_dir = defs.OUTPUT_DIR   
         if os.path.isdir(self.output_dir) and len(os.listdir(self.output_dir)) != 0:
             raise Exception("Output folder %s not empty!" % self.output_dir)
 
     def addStrategy(self, strategy: str):
-        if strategy not in self.result:
-            self.result[strategy] = {}
+        with self.lock:
+            if strategy not in self.result:
+                self.result[strategy] = {}
 
     def addCondition(self, strategy: str, conditionStmt: CondStmt):
-        self.lock.acquire()
-        cond_id = conditionStmt.base.getLogId()
-        self.condition_counter += 1
-        if cond_id not in self.result[strategy]:
-            self.result[strategy][cond_id] = {}
-            self.result[strategy][cond_id]['input'] = []
-            self.result[strategy][cond_id]['output'] = []
-            self.result[strategy][cond_id]['nrOfInputs'] = 0
-            self.result[strategy][cond_id]['nrOfMisses'] = 0
-            self.result[strategy][cond_id]['totalTime'] = 0
-            self.result[strategy][cond_id]['depth'] = conditionStmt.depth
-            self.result[strategy][cond_id]['offsets'] = conditionStmt.offsets
-        #this is done when a strategy starts executing, start the timer
-        self.startTimer(strategy, conditionStmt)
-        self.lock.release()
-
+        with self.lock:
+            cond_id = conditionStmt.base.getLogId()
+            self.condition_counter += 1
+            if cond_id not in self.result[strategy]:
+                self.result[strategy][cond_id] = {}
+                self.result[strategy][cond_id]['input'] = []
+                self.result[strategy][cond_id]['output'] = []
+                self.result[strategy][cond_id]['nrOfInputs'] = 0
+                self.result[strategy][cond_id]['nrOfMisses'] = 0
+                self.result[strategy][cond_id]['totalTime'] = 0
+                self.result[strategy][cond_id]['depth'] = conditionStmt.depth
+                self.result[strategy][cond_id]['offsets'] = conditionStmt.offsets
+            #this is done when a strategy starts executing, start the timer
+            self.startTimer(strategy, conditionStmt)
 
 
     def addRun(self, strategy: str, conditionStmt: CondStmt, inputValue:bytes):
-        self.lock.acquire()
-        self.stopTimer(strategy, conditionStmt) #Always called directly before a run starts
-        cond_id = conditionStmt.base.getLogId()
-        #self.result[strategy][cond_id]['input'].append(inputValue)
-        self.result[strategy][cond_id]['nrOfInputs'] += 1
-        self.lock.release()
+        with self.lock:
+            self.stopTimer(strategy, conditionStmt) #Always called directly before a run starts
+            cond_id = conditionStmt.base.getLogId()
+            #self.result[strategy][cond_id]['input'].append(inputValue)
+            self.result[strategy][cond_id]['nrOfInputs'] += 1
 
     def addResult(self, strategy: str, conditionStmt: CondStmt, status, condition: CondStmtBase):
-        self.lock.acquire()
-        cond_id = conditionStmt.base.getLogId()
-        #self.result[strategy][cond_id]['output'].append((status, condition))
-        self.check(strategy, conditionStmt)
-        if condition.lb1 ==  2**32-1:
-            self.result[strategy][cond_id]['nrOfMisses'] += 1
-        self.startTimer(strategy, conditionStmt) #Always called directly after a run
-        self.lock.release()
+        with self.lock:
+            cond_id = conditionStmt.base.getLogId()
+            #self.result[strategy][cond_id]['output'].append((status, condition))
+            if condition.lb1 ==  2**32-1:
+                self.result[strategy][cond_id]['nrOfMisses'] += 1
+            self.check(strategy, conditionStmt)
+            self.startTimer(strategy, conditionStmt) #Always called directly after a run
 
     def startTimer(self, strategy: str, conditionStmt: CondStmt):
         self.result[strategy][conditionStmt.base.getLogId()]['startTime'] = time.time()
@@ -73,11 +70,9 @@ class Logger:
         cond_id = conditionStmt.base.getLogId()
         if self.result[strategy][cond_id]['totalTime'] >= defs.MAXIMUM_EXECUTION_TIME:
             self.result[strategy][cond_id]['status'] = defs.MAXIMUM_EXECUTION_TIME_STRING
-            self.lock.release()
             raise MaximumExecutionTimeException('Maximum number of runs obtained')
         if self.result[strategy][cond_id]['nrOfInputs'] >= defs.NUMBER_OF_RUNS:
             self.result[strategy][cond_id]['status'] = defs.MAXIMUM_INPUT_STRING
-            self.lock.release()
             raise MaximumRunsException('Maximum number of runs obtained')
 
     def isTiming(self, strategy: str, condition: CondStmt):
@@ -85,28 +80,24 @@ class Logger:
 
     def wrong(self, strategy: str, conditionStmt: CondStmtBase, explanation: str):
         cond_id = conditionStmt.base.getLogId()
-        self.lock.acquire()
-        self.result[strategy][cond_id]['status'] = defs.WRONG_STATUS_STRING
-        self.result[strategy][cond_id]['comment'] = explanation
-        self.lock.release()
+        with self.lock:
+            self.result[strategy][cond_id]['status'] = defs.WRONG_STATUS_STRING
+            self.result[strategy][cond_id]['comment'] = explanation
 
     def comment(self, strategy: str, conditionStmt: CondStmtBase, comment: str):
         cond_id = conditionStmt.getLogId()
-        self.lock.acquire()
-        self.result[strategy][cond_id]['comment'] = comment
-        self.lock.release()
+        with self.lock:
+            self.result[strategy][cond_id]['comment'] = comment
 
     def flipped(self, strategy: str, conditionStmt: CondStmt, explanation):
         cond_id = conditionStmt.base.getLogId()
-        self.lock.acquire()
-        self.result[strategy][cond_id]['status'] = defs.FLIPPED_STRING
-        self.lock.release()
+        with self.lock:
+            self.result[stategy][cond_id]['status'] = defs.FLIPPED_STRING
 
     def done(self, strategy: str, condition: CondStmt):
-        self.lock.acquire()
-        if self.isTiming(strategy, condition):
-            self.stopTimer(strategy, condition)
-        self.lock.release()
+        with self.lock:
+            if self.isTiming(strategy, condition):
+                self.stopTimer(strategy, condition)
 
     # Call at the end of every trace, in order to prevent too much data in memory. Conditions in traces are unique, so you should never overwrite a file
     def writeData(self):
