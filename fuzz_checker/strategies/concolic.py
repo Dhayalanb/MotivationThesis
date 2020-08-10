@@ -19,7 +19,7 @@ class ConcolicStrategy(Strategy):
             new_env['SYMCC_SYMBOLIC_BYTES'] = ",".join(map(str,symbolic_bytes))
             logging.info(new_env['SYMCC_SYMBOLIC_BYTES'])
         arguments = [defs.CONCOLIC_BINARY] + [new_env['SYMCC_INPUT_FILE'] if arg == '@@' else arg for arg in defs.ARGUMENTS ]
-        client = subprocess.Popen([defs.CONCOLIC_BINARY, new_env['SYMCC_INPUT_FILE']], env=new_env, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        client = subprocess.Popen(arguments, env=new_env, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
         try:
             result = client.wait(defs.MAXIMUM_CONCOLIC_EXECUTION_TIME)
         except subprocess.TimeoutExpired as e:
