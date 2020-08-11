@@ -35,7 +35,7 @@ class Handler:
             #socket connection timed out. Restart fork server and client
             print("Process timed out, rebinding")
             self.forkSrv.rebind()
-            (status, returnedCondition) = (-1, condition)
+            (status, returnedCondition) = (-1, condition.base)
         self.logger.addResult(self.strategy, condition, status, returnedCondition)
         #print(returnedCondition.__dict__)
         logging.debug("STATUS: %d" % int.from_bytes(status, "little"))
