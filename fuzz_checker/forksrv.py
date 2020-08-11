@@ -74,7 +74,7 @@ class ForkSrv:
         except socket.timeout as e:
             #kill child process of fork client, kill client later
             try:
-                os.kill(pid, signal.SIGKILL)
+                os.kill(int.from_bytes(pid, byteorder="little"), signal.SIGKILL)
             except OSError as err:
                 #Happens is child already ended between these lines
                 logging.warn("Could not kill child")
