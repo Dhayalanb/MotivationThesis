@@ -99,7 +99,14 @@ class GradientDescentStrategy(Strategy):
         if self.repick_count == 2 or self.repick_count == 3:
             value = 1 if self.repick_count <= 2 else -1
             new_input = MagicByteStrategy.arithmatic(self.original_input, condition, reverse, value)
-            self.handler.comment("arithmatic_%d" % reverse)
+            self.handler.comment("arithmatic_%d_%d" % (value, reverse))
+            self.last_input = new_input
+            (status, condition_output) = self.handler.run(condition, new_input)
+            return condition_output.get_output()
+        if self.repick_count == 4 or self.repick_count == 5:
+            value = -1 if self.repick_count <= 4 else 1
+            new_input = MagicByteStrategy.arithmatic(self.original_input, condition, reverse, value)
+            self.handler.comment("arithmatic_%d_%d" % (value, reverse))
             self.last_input = new_input
             (status, condition_output) = self.handler.run(condition, new_input)
             return condition_output.get_output()
@@ -119,7 +126,7 @@ class GradientDescentStrategy(Strategy):
         self.calculate_gradient(f0, condition, grad)
         local_optima = 0
         while grad.max_value() == 0:
-            if local_optima >= defs.MAX_LOCAL_OPTIMA:
+            if local_optima > defs.MAX_LOCAL_OPTIMA:
                 #stuck in local optima
                 return None
             f0 = self.repick_start_point(condition)

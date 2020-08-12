@@ -35,7 +35,10 @@ class Importer:
             content = input_file.read()
         jsonData = json.loads(content)
         response = []
+        depth = 0
         for item in jsonData:
+            item['depth'] = depth
+            depth += 1
             response.append(CondStmt.fromJson(item))
         return response
 
