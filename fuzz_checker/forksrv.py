@@ -83,6 +83,8 @@ class ForkSrv:
             raise e
         #reset timeout
         self.connection.settimeout(None)
+        if len(cmp_data) != CondStmtBase.getSize():
+            raise socket.timeout()
         #logging.debug('received "%s"', cmp_data)
         receivedCondStmtBase = CondStmtBase.createFromStruct(cmp_data)
         #logging.debug(receivedCondStmtBase.__dict__)
