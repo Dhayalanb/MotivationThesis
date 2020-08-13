@@ -78,14 +78,14 @@ class Logger:
     def isTiming(self, strategy: str, condition: CondStmt):
         return self.result[strategy][condition.base.getLogId()]['startTime'] != None
 
-    def maximumTimeouts(self, strategy:str, condition: CondStmt):
+    def maximumTimeouts(self, strategy:str, conditionStmt: CondStmt):
         cond_id = conditionStmt.base.getLogId()
         with self.lock:
             self.result[strategy][cond_id]['status'] = defs.MAXIMUM_EXECUTION_TIME_STRING
             self.result[strategy][cond_id]['comment'] = "Too many timeouts"
             raise MaximumExecutionTimeException('Maximum number of runs obtained')
 
-    def wrong(self, strategy: str, conditionStmt: CondStmtBase, explanation: str):
+    def wrong(self, strategy: str, conditionStmt: CondStmt, explanation: str):
         cond_id = conditionStmt.base.getLogId()
         with self.lock:
             self.result[strategy][cond_id]['status'] = defs.WRONG_STATUS_STRING
