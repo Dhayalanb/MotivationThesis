@@ -5,6 +5,7 @@ from forksrv import ForkSrv
 from exceptions.execution_exeptions import ConditionFlippedException, MaximumExecutionTimeException
 from socket import timeout
 import logging
+import defs
 
 # Class which executes and logs the execution of the fast program
 # Is unique per thread
