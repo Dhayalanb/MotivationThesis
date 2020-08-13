@@ -43,10 +43,21 @@ class Importer:
         return response
 
     def get_traces_iterator(self):
+        #Processing hangs can take up to a week per trace, skip those
+        hang_files = os.listdir(self.folder+'/../hangs')
+        hangs = list()
+        print("Collecting hangs")
+        for hang_file in hang_files:
+            with open(self.folder+'/../hangs/'+hang_file,'rb') as hang:
+                hangs.append(hang.read())
+        print("Collected hangs")
         number_of_files = 1
         total_files = len(self.files)
         for (input_file, trace_file) in self.files:
             trace = Trace(self.read_input_file(input_file), self.read_fuzz_file(trace_file))
+            if trace.getInput() in hangs:
+                print("Skipped %d/%d files" % (number_of_files, total_files))
+                continue
             print("Processed %d/%d files" % (number_of_files, total_files))
             number_of_files +=1
             yield trace
