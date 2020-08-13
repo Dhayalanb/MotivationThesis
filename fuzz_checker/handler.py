@@ -37,7 +37,7 @@ class Handler:
             #socket connection timed out. Restart fork server and client
             print("Process timed out, rebinding")
             self.forkSrv.rebind()
-            timeouts += 1
+            self.timeouts += 1
             (status, returnedCondition) = (bytes([255]), condition.base)
         self.logger.addResult(self.strategy, condition, status, returnedCondition)
         #print(returnedCondition.__dict__)
@@ -48,6 +48,7 @@ class Handler:
             self.logger.flipped(self.strategy, condition, "flipped")
             raise ConditionFlippedException
         if self.timeouts >= defs.MAXIMUM_TIMEOUTS:
+            print("Too many timeouts!")
             self.logger.maximumTimeouts(self.strategy, self.condition)
         return (status, returnedCondition)
 
