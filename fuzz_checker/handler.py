@@ -2,7 +2,7 @@ from logger import Logger
 from cond_stmt import CondStmt
 from cond_stmt_base import CondStmtBase
 from forksrv import ForkSrv
-from exceptions.execution_exeptions import ConditionFlippedException
+from exceptions.execution_exeptions import ConditionFlippedException, MaximumExecutionTimeException
 from socket import timeout
 import logging
 
@@ -18,6 +18,7 @@ class Handler:
         self.id = id
         self.logger = logger
         self.condition = None
+        self.timeouts = 0
 
     def setupForkServer(self, id):
         server = ForkSrv()
@@ -35,6 +36,7 @@ class Handler:
             #socket connection timed out. Restart fork server and client
             print("Process timed out, rebinding")
             self.forkSrv.rebind()
+            timeouts += 1
             (status, returnedCondition) = (bytes([255]), condition.base)
         self.logger.addResult(self.strategy, condition, status, returnedCondition)
         #print(returnedCondition.__dict__)
@@ -44,17 +46,22 @@ class Handler:
         if returnedCondition.get_condition_output(True) != condition.base.get_condition_output():
             self.logger.flipped(self.strategy, condition, "flipped")
             raise ConditionFlippedException
+        if self.timeouts >= defs.MAXIMUM_TIMEOUTS:
+            self.logger.maximumTimeouts(self.strategy, self.condition)
         return (status, returnedCondition)
 
     def setStrategy(self, strategy: str):
         self.strategy = strategy
         self.logger.addStrategy(self.strategy)
+        self.timeouts = 0
 
     def setCondition(self, condition: CondStmt):
         self.condition = condition
         self.logger.addCondition(self.strategy, condition)
+        self.timeouts = 0
 
     def done(self):
+        self.timeouts = 0
         self.logger.done(self.strategy, self.condition)
 
     def stop(self):
