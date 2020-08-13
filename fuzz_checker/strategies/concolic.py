@@ -19,7 +19,9 @@ class ConcolicStrategy(Strategy):
             new_env['SYMCC_SYMBOLIC_BYTES'] = ",".join(map(str,symbolic_bytes))
             logging.info(new_env['SYMCC_SYMBOLIC_BYTES'])
         arguments = [defs.CONCOLIC_BINARY] + [new_env['SYMCC_INPUT_FILE'] if arg == '@@' else arg for arg in defs.ARGUMENTS ]
-        client = subprocess.Popen(arguments, env=new_env, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        client = subprocess.Popen(arguments, env=new_env, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+            preexec_fn=limit_virtual_memory
+        )
         try:
             result = client.wait(defs.MAXIMUM_CONCOLIC_EXECUTION_TIME)
         except subprocess.TimeoutExpired as e:
@@ -57,3 +59,10 @@ class ConcolicStrategy(Strategy):
             #perform cleanup when done
             self.remove_old_files(id)
         return None
+
+def limit_virtual_memory():
+    # The tuple below is of the form (soft limit, hard limit). Limit only
+    # the soft part so that the limit can be increased later (setting also
+    # the hard limit would prevent that).
+    # When the limit cannot be changed, setrlimit() raises ValueError.
+    resource.setrlimit(resource.RLIMIT_AS, (defs.MAX_VIRTUAL_MEMORY, defs.MAX_VIRTUAL_MEMORY))

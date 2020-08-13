@@ -3,7 +3,7 @@ import sys, os, stat, signal
 from cond_stmt_base import CondStmtBase
 import defs
 import subprocess
-import logging
+import logging, resource
 
 class ForkSrv:
     sock = None
@@ -38,7 +38,9 @@ class ForkSrv:
         new_env = os.environ.copy()
         new_env['ANGORA_FORKSRV_SOCKET_PATH'] = self.server_address
         arguments = [defs.BINARY] + [self.input_file if arg == '@@' else arg for arg in defs.ARGUMENTS ]
-        self.client = subprocess.Popen(arguments, env=new_env, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        self.client = subprocess.Popen(arguments, env=new_env, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+        preexec_fn=limit_virtual_memory
+        )
 
     def reset_input_file(self, input_content):
         self.file_hander.seek(0)
@@ -97,3 +99,10 @@ class ForkSrv:
         self.client.kill()
         os.remove(self.server_address)
         os.remove(self.input_file)
+
+def limit_virtual_memory():
+    # The tuple below is of the form (soft limit, hard limit). Limit only
+    # the soft part so that the limit can be increased later (setting also
+    # the hard limit would prevent that).
+    # When the limit cannot be changed, setrlimit() raises ValueError.
+    resource.setrlimit(resource.RLIMIT_AS, (defs.MAX_VIRTUAL_MEMORY, defs.MAX_VIRTUAL_MEMORY))
