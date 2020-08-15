@@ -1,0 +1,8 @@
+Strategy, min, max, average
+RandomStrategy,0.00,0.11,0.04
+RandomTaintStrategy,0.00,2.21,0.02
+MagicByteStrategy,0.00,0.09,0.00
+GradientDescentStrategy,0.00,0.08,0.00
+ConcolicStrategy,0.05,0.37,0.08
+OneByteStrategy,0.00,0.10,0.00
+LengthTaintStrategy,0.00,0.08,0.00
