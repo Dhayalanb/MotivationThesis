@@ -44,55 +44,86 @@ class Parser:
                 csv += "0,"*(len(all_statuses)-1)
                 csv = csv[:-1] #remove trailing ,
                 csv += "\n"
+        angora_flips = 0
+        for cmp_id in self.all_condition_ids:
+            split_cmp_id = cmp_id.split("_")
+            split_cmp_id[2] = str((int(split_cmp_id[2])+1)%2)
+            if "_".join(split_cmp_id) in self.all_condition_ids:
+                angora_flips += 1
+        csv += "Angora," + str(angora_flips) + "," + "0,"*(len(all_statuses)-1)
+        csv = csv[:-1] #remove trailing ,
+        csv += "\n"
         with open(self.output_dir + 'status.csv', 'w') as output:
             output.write(csv)
 
 
 
 
-    def make_csv_depth(self, all_results, max_depth):
-        bucket_size = max_depth/self.depth_buckets
-        csv = "Strategy,"+ ",".join([str(i*bucket_size)+ '-' + str((i+1)*bucket_size) for i in range(self.depth_buckets)])  + "\n"
-        for strategy in all_results:
-            csv += strategy +","
-            for bucket in range(self.depth_buckets):
-                if bucket in all_results[strategy]['depth']:
-                    number_of_flips = all_results[strategy]['depth'][bucket]
+    def make_csv_depth(self, all_results, max_depth, total_depth):
+        strategies = [strategy for strategy in all_results]
+        csv = "Strategy,TOTAL,"+ ",".join(strategies)  + "\n"
+        for i in range(self.depth_buckets):
+            total = 0
+            if i in total_depth:
+                total = total_depth[i]
+            value_to_subtract = 1
+            if i == self.depth_buckets-1:
+                value_to_subtract = 0
+            csv += str(int(i/float(self.depth_buckets)*100))+ '-' + str(int((i+1)/float(self.depth_buckets)*100)-value_to_subtract) + '%,' + str(total) + ','
+            for strategy in strategies:
+                if i in all_results[strategy]['depth']:
+                    number_of_flips = all_results[strategy]['depth'][i]/total*100
                 else:
                     number_of_flips = 0
-                csv += str(number_of_flips) + ","
+                csv += "{:.2f}".format(number_of_flips) + ","
             csv = csv[:-1]
             csv += "\n"
         with open(self.output_dir + 'depth.csv', 'w') as output:
             output.write(csv)
                 
+    def make_csv_time(self, result):
+        csv = "Strategy, min, max, average\n"
+        for strategy in result:
+            all_times = [result[strategy][cmp_id]['totalTime'] for cmp_id in result[strategy]]
+            csv += strategy + ',' + ','.join(["{:.2f}".format(min(all_times)), "{:.2f}".format(max(all_times)), "{:.2f}".format(sum(all_times)/len(all_times))]) + "\n"
+        with open(self.output_dir + 'timing.csv' , 'w') as output:
+            output.write(csv)
+
 
 
     def make_csv_offsets(self, all_results, total_offsets):
-        csv = "Strategy,"+ ",".join([str(i) for i in total_offsets])  + "\n"
-        csv += "Total," + ",".join([str(total_offsets[i]) for i in total_offsets]) + "\n"
-        for strategy in all_results:
-            offsets = all_results[strategy]['offsets']
-            csv += strategy + ',' + ",".join([str(offsets[i]) for i in total_offsets])
+        strategies = [strategy for strategy in all_results]
+        csv = "Strategy,Total,"+ ",".join(strategies)  + "\n"
+        offsets = [i for i in total_offsets]
+        offsets.sort()
+        for i in offsets:
+            csv += str(i) + ',' + str(total_offsets[i])
+            for strategy in strategies:
+                found_offsets = all_results[strategy]['offsets']
+                nr_of_offsets = 0
+                if i in found_offsets:
+                    nr_of_offsets = found_offsets[i]
+                csv += ',' + "{:.2f}".format(nr_of_offsets/total_offsets[i]*100)
             csv += "\n"
         with open(self.output_dir + 'offsets.csv', 'w') as output:
             output.write(csv)
-            
+        
 
-    def make_csv(self, all_results, max_depth, total_offsets):
+    def make_csv(self, all_results, max_depth, total_offsets, total_depth):
         self.make_csv_status(all_results)
-        self.make_csv_depth(all_results, max_depth)
+        self.make_csv_depth(all_results, max_depth, total_depth)
         self.make_csv_offsets(all_results, total_offsets)
 
     def process_results(self, results: dict):
         first_time = True
         total_offsets = {}
+        total_depth = {}
         total_results = {}
         max_depth = 0
 
         #Make sure we start with the magic byte strategy, we added the offset parameter later, but this is a global statistic
         strategy_names = list(results.keys())
-        offset_logged_for_strategy = 'OneByteStrategy'
+        offset_logged_for_strategy = 'GradientDescentStrategy'
         if offset_logged_for_strategy in strategy_names:
             strategy_names.insert(0,strategy_names.pop(strategy_names.index(offset_logged_for_strategy)))
         for strategy_name in strategy_names:
@@ -137,6 +168,10 @@ class Parser:
                         status_results_depth[bucket_index] = 0
                     if status == defs.FLIPPED_STRING:
                         status_results_depth[bucket_index] += 1
+                    if bucket_index not in total_depth and first_time:
+                        total_depth[bucket_index] = 0
+                    if first_time:
+                        total_depth[bucket_index] += 1
                 
                 #add number of offsets where we flipped the conditions
                 nr_of_offsets = len(results[offset_logged_for_strategy][cmp_id]['offsets'])
@@ -150,6 +185,8 @@ class Parser:
                     total_offsets[nr_of_offsets] += 1
                 if status == defs.FLIPPED_STRING:
                     status_results_offsets[nr_of_offsets] += 1
+                    if nr_of_offsets != 1 and strategy_name == 'OneByteStrategy':
+                        print(cmp_id)
             
             total_results[strategy_name] = {
                 'status' : status_results,
@@ -169,13 +206,14 @@ class Parser:
             print("\n")
             first_time = False
         print("Unique conditions:\t%d\nFlipped conditions:\t%d" % (len(self.all_condition_ids), len(self.flipped_condition_ids)))
-        self.make_csv(total_results, max_depth, total_offsets)
+        self.make_csv(total_results, max_depth, total_offsets, total_depth)
 
     def parse(self, input_folder, output_folder):
         if output_folder:
-            self.output_dir
+            self.output_dir = output_folder
         result = self.parse_folder(input_folder)
         self.process_results(result)
+        self.make_csv_time(result)
 
 def main(argv):
     input_dir = None

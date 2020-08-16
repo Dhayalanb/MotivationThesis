@@ -5,7 +5,7 @@ import logging, os, sys, getopt, defs
 
 
 def main(argv):
-    logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
+    logging.basicConfig(level=os.environ.get("LOGLEVEL", "WARNING"))
     try:
         opts, args = getopt.getopt(argv,"hb:c:j:o:t:a:",["help", "binary=","concolic=","threads=","output=", "traces=", "arguments="])
     except getopt.GetoptError:
@@ -39,16 +39,15 @@ def main(argv):
     traces = importer.get_traces_iterator()
     server = ForkSrv()
     server.listen(0)
+    j = 0
     for trace in traces:
-        (status, result) = server.run_with_condition(trace.getCondition(0).base,trace.getInput())
-        print("%d" % result.lb1)
-        if result.lb1 == 2**32-1:
-            print("First condition not reached!")
-        (status, result) = server.run_with_condition(trace.getCondition(trace.getConditionLength()-1).base,trace.getInput())
-        print("%d" % result.lb1)
-        if result.lb1 == 2**32-1:
-            print("Last not reached!")
-        break
+        for i in range(len(trace.conditions)):
+            (status, result) = server.run_with_condition(trace.getCondition(0).base,trace.getInput())
+            #print("%d" % result.lb1)
+            if result.lb1 == 2**32-1:
+                print("Condition not reached!")
+                print("trace: %d condition %d" % (j,i))
+        j+=1
     server.close()
 
 if __name__ == "__main__":
