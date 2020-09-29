@@ -42,7 +42,9 @@ def main(argv):
     j = 0
     for trace in traces:
         for i in range(len(trace.conditions)):
-            (status, result) = server.run_with_condition(trace.getCondition(0).base,trace.getInput())
+            condition = trace.getCondition(i).base
+            condition.lb1 = 2**32-1
+            (status, result) = server.run_with_condition(condition,trace.getInput())
             #print("%d" % result.lb1)
             if result.lb1 == 2**32-1:
                 print("Condition not reached!")
