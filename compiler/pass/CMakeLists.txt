@@ -50,4 +50,7 @@ add_library(AngoraPass MODULE AngoraPass.cc)
 target_link_libraries(AngoraPass LLVMPassConfig)
 install (TARGETS AngoraPass DESTINATION ${ANGORA_PASS_DIR})
 
+add_library(StaticAnalysisPass MODULE StaticAnalysisPass.cpp)
+target_link_libraries(StaticAnalysisPass LLVMPassConfig)
+install (TARGETS StaticAnalysisPass DESTINATION ${ANGORA_PASS_DIR})
 
