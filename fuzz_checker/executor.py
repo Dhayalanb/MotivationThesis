@@ -86,7 +86,7 @@ class Executor:
         self.setupHandlers()
         logging.info("Found %d traces" % self.total_traces)
         number_of_traces = 1
-        files = []
+        files = []#os.listdir("../angora_results/tcpdump/results_long/GradientDescentStrategy/")
         seen_conditions = set([file_name[:-5] for file_name in files])
         for trace in self.traces:
             logging.info("New trace with %d conditions" % len(trace.conditions))

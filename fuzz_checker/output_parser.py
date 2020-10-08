@@ -108,6 +108,30 @@ class Parser:
         with open(self.output_dir + 'offsets.csv', 'w') as output:
             output.write(csv)
         
+    def check_context(self, results):
+        all_ids = [cmp_id.split('_') for cmp_id in self.all_condition_ids]
+        data = results['GradientDescentStrategy']
+        ids_without_context = {}
+        for cmp_id in all_ids:
+            total_id = cmp_id[0] + '_' + cmp_id[2] + '_' + cmp_id[3]
+            if total_id not in ids_without_context:
+                ids_without_context[total_id] = []
+            ids_without_context[total_id].append('_'.join(cmp_id))
+        print("Total unique comparisons with context: %s" % len(all_ids))
+        print("Total unique comparisons without context: %s" % len(ids_without_context))
+        print("Total ids with more than 1 context: %s" % len([i for i in ids_without_context if len(ids_without_context[i]) > 1]))
+        print("Maximum occurances of a condition %s" % max(map(len, ids_without_context.values())))
+        flips_per_context = {}
+        for context_insensitive_id in ids_without_context:
+            if context_insensitive_id not in flips_per_context:
+                flips_per_context[context_insensitive_id] = {'max': len(ids_without_context[context_insensitive_id]), 'count':0}
+            for cmp_id in ids_without_context[context_insensitive_id]:
+                if data[cmp_id]['status'] == defs.FLIPPED_STRING:
+                    flips_per_context[context_insensitive_id]['count'] += 1
+        print("Flipped all contexts %s/%s" % (len([i for i in flips_per_context if flips_per_context[i]['count'] == flips_per_context[i]['max']]), len(flips_per_context)))
+        print("Flipped some contexts %s/%s" % (len([i for i in flips_per_context if flips_per_context[i]['count'] != flips_per_context[i]['max'] and flips_per_context[i]['count'] != 0]), len(flips_per_context)))
+        print("Flipped no contexts %s/%s" % (len([i for i in flips_per_context if flips_per_context[i]['count'] == 0]), len(flips_per_context)))
+
 
     def make_csv(self, all_results, max_depth, total_offsets, total_depth):
         self.make_csv_status(all_results)
@@ -213,6 +237,7 @@ class Parser:
             self.output_dir = output_folder
         result = self.parse_folder(input_folder)
         self.process_results(result)
+        self.check_context(result)
         self.make_csv_time(result)
 
 def main(argv):

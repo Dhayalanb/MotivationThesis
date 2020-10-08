@@ -54,9 +54,15 @@ class Importer:
         number_of_files = 1
         total_files = len(self.files)
         for (input_file, trace_file) in self.files:
-            trace = Trace(self.read_input_file(input_file), self.read_fuzz_file(trace_file))
+            trace_content = self.read_fuzz_file(trace_file)
+            if not len(trace_content):
+                print("Skipped %d/%d files due to empty trace" % (number_of_files, total_files))
+                number_of_files +=1
+                continue
+            trace = Trace(self.read_input_file(input_file), trace_content)
             if trace.getInput() in hangs:
                 print("Skipped %d/%d files" % (number_of_files, total_files))
+                number_of_files +=1
                 continue
             print("Processed %d/%d files" % (number_of_files, total_files))
             number_of_files +=1
