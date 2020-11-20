@@ -6,6 +6,9 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
+scipy = "*"
+matplotlib = "*"
+scikit-posthocs = "*"
 
 [requires]
 python_version = "3.5"
