@@ -33,7 +33,8 @@ class Logger:
                 self.result[strategy][cond_id]['nrOfInputs'] = 0
                 self.result[strategy][cond_id]['nrOfMisses'] = 0
                 self.result[strategy][cond_id]['totalTime'] = 0
-                self.result[strategy][cond_id]['totalExecutionTime'] = 0
+                self.result[strategy][cond_id]['totalExecutionTime'] = None
+                self.result[strategy][cond_id]['startExecutionTime'] = time.time()
                 self.result[strategy][cond_id]['depth'] = conditionStmt.depth
                 self.result[strategy][cond_id]['offsets'] = conditionStmt.offsets
             #this is done when a strategy starts executing, start the timer
@@ -58,7 +59,6 @@ class Logger:
 
     def startTimer(self, strategy: str, conditionStmt: CondStmt):
         self.result[strategy][conditionStmt.base.getLogId()]['startTime'] = time.time()
-        self.result[strategy][conditionStmt.base.getLogId()]['startExecutionTime'] = time.time()
 
     def stopTimer(self, strategy: str, conditionStmt: CondStmt):
         cond_id = conditionStmt.base.getLogId()
@@ -107,7 +107,7 @@ class Logger:
         with self.lock:
             if self.isTiming(strategy, condition):
                 self.stopTimer(strategy, condition)
-            if self.result[strategy][condition.base.getLogId()]['totalExecutionTime'] == 0:
+            if self.result[strategy][condition.base.getLogId()]['totalExecutionTime'] == None:
                 self.result[strategy][condition.base.getLogId()]['totalExecutionTime'] = time.time() - self.result[strategy][condition.base.getLogId()]['startExecutionTime']
 
     # Call at the end of every trace, in order to prevent too much data in memory. Conditions in traces are unique, so you should never overwrite a file
