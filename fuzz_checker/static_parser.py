@@ -25,9 +25,8 @@ class StaticParser:
     def parse_analysis_files(folder):
         cmpids = {}
         for analysis_file in os.listdir(folder) :
-            if analysis_file.startswith("static_analysis_results"):
-                found_cmpids = StaticParser.parse_analysis_file(folder, analysis_file)
-                cmpids = {**cmpids, **found_cmpids}
+            found_cmpids = StaticParser.parse_analysis_file(folder, analysis_file)
+            cmpids = {**cmpids, **found_cmpids}
         return cmpids
 
     @staticmethod
@@ -43,4 +42,4 @@ class StaticParser:
                 output[static_metric.cmpid] = static_metric
         return output
 
-test = StaticParser.parse_analysis_files("../test/mini/")
+#test = StaticParser.parse_analysis_files("../test/mini/")

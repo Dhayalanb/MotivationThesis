@@ -33,6 +33,7 @@ class Logger:
                 self.result[strategy][cond_id]['nrOfInputs'] = 0
                 self.result[strategy][cond_id]['nrOfMisses'] = 0
                 self.result[strategy][cond_id]['totalTime'] = 0
+                self.result[strategy][cond_id]['totalExecutionTime'] = 0
                 self.result[strategy][cond_id]['depth'] = conditionStmt.depth
                 self.result[strategy][cond_id]['offsets'] = conditionStmt.offsets
             #this is done when a strategy starts executing, start the timer
@@ -57,6 +58,7 @@ class Logger:
 
     def startTimer(self, strategy: str, conditionStmt: CondStmt):
         self.result[strategy][conditionStmt.base.getLogId()]['startTime'] = time.time()
+        self.result[strategy][conditionStmt.base.getLogId()]['startExecutionTime'] = time.time()
 
     def stopTimer(self, strategy: str, conditionStmt: CondStmt):
         cond_id = conditionStmt.base.getLogId()
@@ -68,12 +70,12 @@ class Logger:
 
     def check(self, strategy: str, conditionStmt: CondStmt):
         cond_id = conditionStmt.base.getLogId()
-        if self.result[strategy][cond_id]['totalTime'] >= defs.MAXIMUM_EXECUTION_TIME:
+        if time.time() - self.result[strategy][cond_id]['startExecutionTime'] >= defs.MAXIMUM_EXECUTION_TIME:
             self.result[strategy][cond_id]['status'] = defs.MAXIMUM_EXECUTION_TIME_STRING
-            raise MaximumExecutionTimeException('Maximum number of runs obtained')
-        if self.result[strategy][cond_id]['nrOfInputs'] >= defs.NUMBER_OF_RUNS:
-            self.result[strategy][cond_id]['status'] = defs.MAXIMUM_INPUT_STRING
-            raise MaximumRunsException('Maximum number of runs obtained')
+            raise MaximumExecutionTimeException('Maximum time used')
+        #if self.result[strategy][cond_id]['nrOfInputs'] >= defs.NUMBER_OF_RUNS:
+        #    self.result[strategy][cond_id]['status'] = defs.MAXIMUM_INPUT_STRING
+        #    raise MaximumRunsException('Maximum number of runs obtained')
 
     def isTiming(self, strategy: str, condition: CondStmt):
         return self.result[strategy][condition.base.getLogId()]['startTime'] != None
@@ -105,6 +107,8 @@ class Logger:
         with self.lock:
             if self.isTiming(strategy, condition):
                 self.stopTimer(strategy, condition)
+            if self.result[strategy][condition.base.getLogId()]['totalExecutionTime'] == 0:
+                self.result[strategy][condition.base.getLogId()]['totalExecutionTime'] = time.time() - self.result[strategy][condition.base.getLogId()]['startExecutionTime']
 
     # Call at the end of every trace, in order to prevent too much data in memory. Conditions in traces are unique, so you should never overwrite a file
     def writeData(self):

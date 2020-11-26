@@ -5,12 +5,15 @@ import matplotlib.pyplot as plt
 
 STRATEGIES = ['GradientDescentStrategy', 'MagicByteStrategy' , 'OneByteStrategy', 'LengthTaintStrategy', 'ConcolicStrategy', 'RandomStrategy', 'RandomTaintStrategy']
 VARIABLES_TO_TEST = ['oviedo', 'cyclomatic' , 'nrOfOffsets', 'cases', 'chain_size', 'depth2', 'trace_length']
+VARIABLES_TO_PRINT = ['Ovie', 'Cycl' , 'Offs', 'Cases', 'Chain', 'AbsD', 'RelD']
 LOCATION = '../results/matplots/'
 
 def make_tests(header, data):
     test_results = {}
     for strategy in STRATEGIES:
         data_to_test = data[strategy]
+        if strategy not in test_results:
+            test_results[strategy] = {}
         for variable in VARIABLES_TO_TEST:
             #collect data
             collected_data = []
@@ -25,10 +28,42 @@ def make_tests(header, data):
             x = [x[0] for x in collected_data if x[1] == 0] #population which is not flipped
             y = [x[0] for x in collected_data if x[1] == 1] #population which is flipped
             print("testing %s" % (variable))
-            test_results[variable] = scipy.stats.mannwhitneyu(x, y, use_continuity = (True if variable == 'relative_depth' else False))
+            test_results[strategy][variable] = scipy.stats.mannwhitneyu(x, y, use_continuity = (True if variable == 'relative_depth' else False))
     return test_results
 
-def make_plots(header, data, test_result, name):
+def make_tables(test_results, name):
+    csv = ","+",".join(VARIABLES_TO_TEST) + "\n"
+    latex = '''
+    \\begin{table}[H]
+    \centering
+    \\begin{tabular}{llllllll}
+&  ''' + "&".join(VARIABLES_TO_PRINT) + "\\\\\n" 
+    for strategy in STRATEGIES:
+        csv += strategy + ","
+        latex += strategy + "&"
+        for variable in VARIABLES_TO_TEST:
+            result = str(round(test_results[strategy][variable].pvalue, 2))
+            csv += result + ','
+            if test_results[strategy][variable].pvalue < 0.05:
+                latex += "\cellcolor[HTML]{FFC7CE}{\color[HTML]{9C0006}" + result + '}&'
+            else:
+                latex += result + '&'
+        csv = csv[:-1] + "\n"
+        latex = latex[:-1] + "\\\\\n"
+    latex += '''
+    \end{tabular}
+    \caption{Significant difference of several metrics \\texttt{%s} binary}
+    \label{tab:%sWhitneyU}
+    \end{table}
+    ''' % (name, name)
+    with open(LOCATION + name + '_tests.csv', 'w') as csv_file:
+        csv_file.write(csv)
+    with open(LOCATION + name + '_tests.tex', 'w') as latex_file:
+        latex_file.write(latex)
+
+    
+
+def make_plots(header, data, name):
     #make total flip plot
     keys = {}
     for strategy in STRATEGIES:
@@ -89,9 +124,6 @@ def make_plots(header, data, test_result, name):
         ax.plot(labels, x, label=strategy)
     ax.legend()
     plt.savefig(LOCATION + name + '_offsets.svg')
-    #make statistic test table
-    
-    #make time table
 
 def process_file(raw_file):
     with open(raw_file, 'r') as input_file:
@@ -138,7 +170,9 @@ def main(argv):
     print("Doing tests")
     test_result = make_tests(header, processed_data)
     print("Making plots")
-    make_plots(header, processed_data, test_result, name)
+    make_plots(header, processed_data, name)
+    print("Making tables")
+    make_tables(test_result, name)
     print("Done!")
 
 if __name__ == "__main__":

@@ -8,19 +8,26 @@ class Parser:
     all_condition_ids = set()
     depth_buckets = 10
 
-    def parse_file(self, file_name):
+    @staticmethod
+    def parse_file(file_name):
         with open(file_name, 'r') as input_file:
             data = input_file.read()
         return json.loads(data)
 
 
-    def parse_folder(self, folder):
+    @staticmethod
+    def parse_folder(folder):
         results = {}
         for strategy_name in os.listdir(folder):
             if os.path.isdir(folder+'/'+ strategy_name):
                 results[strategy_name] = {}
-                for file_name in os.listdir(folder+'/'+ strategy_name):
-                    results[strategy_name][file_name] = self.parse_file(folder+'/'+ strategy_name + '/'+ file_name)
+                files_to_parse = os.listdir(folder+'/'+ strategy_name)
+                number_of_files_to_parse = len(files_to_parse)
+                count = 0
+                for file_name in files_to_parse:
+                    results[strategy_name][file_name] = Parser.parse_file(folder+'/'+ strategy_name + '/'+ file_name)
+                    count += 1
+                    print("Processed file %d/%d" % (count, number_of_files_to_parse))
         return results
 
 
@@ -235,7 +242,7 @@ class Parser:
     def parse(self, input_folder, output_folder):
         if output_folder:
             self.output_dir = output_folder
-        result = self.parse_folder(input_folder)
+        result = Parser.parse_folder(input_folder)
         self.process_results(result)
         self.check_context(result)
         self.make_csv_time(result)
