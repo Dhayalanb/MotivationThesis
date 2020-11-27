@@ -126,9 +126,9 @@ class GradientDescentStrategy(Strategy):
         self.calculate_gradient(f0, condition, grad)
         local_optima = 0
         while grad.max_value() == 0:
-            if local_optima > defs.MAX_LOCAL_OPTIMA:
+            #if local_optima > defs.MAX_LOCAL_OPTIMA:
                 #stuck in local optima
-                return None
+                #return None
             f0 = self.repick_start_point(condition)
             self.repick_count += 1
             self.calculate_gradient(f0, condition, grad)
@@ -148,7 +148,7 @@ class GradientDescentStrategy(Strategy):
         epoch = 0
         output_value = condition.base.get_output() #TODO checks on status?
         logging.debug("Original output: %s",output_value)
-        while epoch < defs.MAX_GRAD_ITERATIONS:
+        while True: #try until timeout
             output_value = self.gradient_iteration(output_value, condition, grad)
             if output_value == None:
                 # Not changing input anymore
