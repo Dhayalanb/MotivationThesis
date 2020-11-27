@@ -49,7 +49,17 @@ class Executor:
         return handler
 
     def returnHandler(self, handler):
-        handler.done()
+        try:
+            handler.done()
+        except MaximumExecutionTimeException:
+            logging.info("Maximum run time")
+            pass
+        except MaximumRunsException:
+            logging.info("Maximum runs")
+            pass
+        except ConditionFlippedException:
+            logging.info("Condition flipped!")
+            pass
         self.handlerLock.acquire()
         self.handlers.append(handler)
         self.handlerLock.notify()
