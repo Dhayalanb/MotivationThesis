@@ -1,0 +1,8 @@
+,oviedo,cyclomatic,nrOfOffsets,cases,chain_size,depth2,trace_length
+GradientDescentStrategy,0.0,0.0,0.0,0.01,0.02,0.05,0.0
+MagicByteStrategy,0.3,0.01,0.0,0.0,0.0,0.0,0.15
+OneByteStrategy,0.34,0.0,0.0,0.0,0.0,0.0,0.0
+LengthTaintStrategy,nan,nan,nan,nan,nan,nan,nan
+ConcolicStrategy,0.0,0.0,0.11,0.0,0.0,0.41,0.12
+RandomStrategy,0.22,0.2,0.12,0.0,0.0,0.0,0.05
+RandomTaintStrategy,0.08,0.0,0.0,0.0,0.0,0.0,0.08
