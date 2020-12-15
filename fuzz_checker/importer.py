@@ -54,8 +54,11 @@ class Importer:
         number_of_files = 1
         total_files = len(self.files)
         for (input_file, trace_file) in self.files:
-            trace_content = self.read_fuzz_file(trace_file)
-            if not len(trace_content):
+            try:
+                trace_content = self.read_fuzz_file(trace_file)
+            except:
+                pass
+            if not trace_content or not len(trace_content):
                 print("Skipped %d/%d files due to empty trace" % (number_of_files, total_files))
                 number_of_files +=1
                 continue
