@@ -23,6 +23,25 @@ class Importer:
                 response.append((input_file, "track_id_"+input_id+".json"))
         return response
 
+
+    def get_reachableness(self, offsets, reachableness):
+        temp = []
+        for offset in offsets:
+            begin_index = offset['begin']
+            end_index = offset['end']
+            temp += reachableness[begin_index:end_index]
+        return sum(temp)
+
+    def update_reachableness(self, offsets, reachableness):
+        for offset in offsets:
+            begin_index = offset['begin']
+            end_index = offset['end']
+            if len(reachableness) < end_index:
+                reachableness += [0 for i in range(end_index-len(reachableness))]
+            for i in range(begin_index, end_index):
+                reachableness[i] += 1
+        return reachableness
+
     def read_input_file(self, fileLocation):
         content = None
         with open(self.folder+fileLocation, 'rb') as input_file:
@@ -31,6 +50,7 @@ class Importer:
 
     def read_fuzz_file(self, fileLocation):
         content = None
+        reachableness = []
         with open(self.folder+fileLocation, 'r') as input_file:
             content = input_file.read()
         jsonData = json.loads(content)
@@ -39,7 +59,10 @@ class Importer:
         for item in jsonData:
             item['depth'] = depth
             depth += 1
-            response.append(CondStmt.fromJson(item))
+            condition = CondStmt.fromJson(item)
+            reachableness = self.update_reachableness(condition.offsets, reachableness)
+            condition.reachableness = self.get_reachableness(condition.offsets, reachableness)
+            response.append(condition)
         return response
 
     def get_traces_iterator(self):
