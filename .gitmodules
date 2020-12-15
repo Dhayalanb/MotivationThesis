@@ -1,6 +1,6 @@
-[submodule "includes/Angora"]
-	path = includes/Angora
-	url = https://github.com/Luc-Veldhuis/Angora
 [submodule "includes/symcc"]
 	path = includes/symcc
 	url = https://github.com/Luc-Veldhuis/symcc
+[submodule "includes/Angora"]
+	path = includes/Angora
+	url = https://github.com/Luc-Veldhuis/Angora

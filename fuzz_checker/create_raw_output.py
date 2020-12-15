@@ -28,20 +28,22 @@ def combine_results(dynamic_files, static_files, relative_depth):
             result['chain_size'] =  static_files[cmpid].chain_size  if should_fill_in else "-"
             result['cases'] =  static_files[cmpid].cases  if should_fill_in else "-"
             if file_name[:-5] in relative_depth:
-                result['trace_length'] = relative_depth[file_name[:-5]]
+                result['trace_length'] = relative_depth[file_name[:-5]][1]
+                result['reachableness'] = relative_depth[file_name[:-5]][2]
             else:
                 result['trace_length'] = -1
+                result['reachableness'] = 0
             results.append(result)
     return results
 
 
 def write_results(results, output_name):
-    csv = "Strategy,id,cmpid,nrOfMisses,nrOfInputs,depth,status,totalTime,nrOfOffsets,cyclomatic,oviedo,chain_size,cases,depth2,trace_length,flipped\n"
+    csv = "Strategy,id,cmpid,nrOfMisses,nrOfInputs,depth,status,totalTime,nrOfOffsets,cyclomatic,oviedo,chain_size,cases,depth2,trace_length,flipped,reachableness\n"
     for result in results:
         for key in result:
             if key != 'trace_length':
                 result[key] = str(result[key])
-        csv += result['strategy'] + "," + result['id'] + "," + result['cmpid'] + "," + result['nrOfMisses'] + "," + result['nrOfInputs'] + "," + result['depth'] + "," + result['status'] + "," + result['totalTime'] + "," + result['nrOfOffsets'] + "," + result['cyclomatic'] + "," + result['oviedo'] + "," + result['chain_size'] + ","+ result['cases']+ ","+ str(result['trace_length'][0]) + ","+ str(result['trace_length'][1]) + ","+ result['flipped']
+        csv += result['strategy'] + "," + result['id'] + "," + result['cmpid'] + "," + result['nrOfMisses'] + "," + result['nrOfInputs'] + "," + result['depth'] + "," + result['status'] + "," + result['totalTime'] + "," + result['nrOfOffsets'] + "," + result['cyclomatic'] + "," + result['oviedo'] + "," + result['chain_size'] + ","+ result['cases']+ ","+ str(result['trace_length'][0]) + ","+ str(result['trace_length'][1]) + ","+ result['flipped'] + "," + result['reachableness']
         csv += "\n"
     with open(output_name, 'w') as output_file:
         output_file.write(csv)
