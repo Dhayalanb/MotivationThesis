@@ -28,10 +28,10 @@ def combine_results(dynamic_files, static_files, relative_depth):
             result['chain_size'] =  static_files[cmpid].chain_size  if should_fill_in else "-"
             result['cases'] =  static_files[cmpid].cases  if should_fill_in else "-"
             if file_name[:-5] in relative_depth:
-                result['trace_length'] = relative_depth[file_name[:-5]][1]
+                result['trace_length'] = relative_depth[file_name[:-5]]
                 result['reachableness'] = relative_depth[file_name[:-5]][2]
             else:
-                result['trace_length'] = -1
+                result['trace_length'] = (-1,-1)
                 result['reachableness'] = 0
             results.append(result)
     return results
@@ -53,10 +53,11 @@ def get_depth_from_traces(traces):
     for trace in traces:
         trace_length = trace.getConditionLength()
         for i in range(trace_length):
-            condition = trace.getCondition(i).base
-            cmpid = condition.getLogId()
+            condition = trace.getCondition(i)
+            condition_base = condition.base
+            cmpid = condition_base.getLogId()
             if cmpid not in relative_depth:
-                relative_depth[cmpid] = (i, trace_length)
+                relative_depth[cmpid] = (i, trace_length, condition.reachableness)
     return relative_depth
 
 def main(argv):
