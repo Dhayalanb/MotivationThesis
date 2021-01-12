@@ -44,7 +44,7 @@ def write_results(results, output_name):
         for key in result:
             if key != 'trace_length':
                 result[key] = str(result[key])
-        csv += result['strategy'] + "," + result['id'] + "," + result['cmpid'] + "," + result['nrOfMisses'] + "," + result['nrOfInputs'] + "," + result['depth'] + "," + result['status'] + "," + result['totalTime'] + "," + result['nrOfOffsets'] + "," + result['cyclomatic'] + "," + result['oviedo'] + "," + result['chain_size'] + ","+ result['cases']+ ","+ str(result['trace_length'][0]) + ","+ str(result['trace_length'][1]) + ","+ result['flipped'] + "," + result['reachableness'] + "," + result['combined']
+        csv += result['strategy'] + "," + result['id'] + "," + result['cmpid'] + "," + result['nrOfMisses'] + "," + result['nrOfInputs'] + "," + result['depth'] + "," + result['status'] + "," + result['totalExecutionTime'] + "," + result['nrOfOffsets'] + "," + result['cyclomatic'] + "," + result['oviedo'] + "," + result['chain_size'] + ","+ result['cases']+ ","+ str(result['trace_length'][0]) + ","+ str(result['trace_length'][1]) + ","+ result['flipped'] + "," + result['reachableness'] + "," + result['combined']
         csv += "\n"
     with open(output_name, 'w') as output_file:
         output_file.write(csv)
@@ -68,18 +68,20 @@ def average_dynamic_files(dynamic_files):
             if strategy not in dynamic_results:
                 dynamic_results[strategy] = {}
             for file_name in dynamic_file[strategy]:
-                if file_name in dynamic_results:
+                if file_name in dynamic_results[strategy]:
                     #Take average of time, if it was flipped, set status to flipped
                     combined = dynamic_results[strategy][file_name]['combined']
-                    old_total_time = dynamic_results[strategy][file_name]['totalTime']
-                    new_total_time = (dynamic_file[strategy][file_name]['totalTime'] + old_total_time*combined)/(combined+1)
+                    old_total_time = dynamic_results[strategy][file_name]['totalExecutionTime']
+                    new_total_time = (dynamic_file[strategy][file_name]['totalExecutionTime'] + old_total_time*combined)/(combined+1)
                     dynamic_results[strategy][file_name]['combined'] += 1
-                    dynamic_results[strategy][file_name]['totalTime'] = new_total_time
+                    dynamic_results[strategy][file_name]['totalExecutionTime'] = new_total_time
                     if (dynamic_file[strategy][file_name]['status'] == defs.FLIPPED_STRING):
                         dynamic_results[strategy][file_name]['status'] = defs.FLIPPED_STRING
                 else:
                     dynamic_results[strategy][file_name] = dynamic_file[strategy][file_name]
                     dynamic_results[strategy][file_name]['combined'] = 1
+    return dynamic_results
+
 def main(argv):
     dynamic_folders = []
     static_folder = ""
