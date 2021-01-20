@@ -34,17 +34,19 @@ def combine_results(dynamic_files, static_files, relative_depth):
             else:
                 result['trace_length'] = (-1,-1)
                 result['reachableness'] = 0
+            if 'comment' not in result:
+                result['comment'] = ''
             results.append(result)
     return results
 
 
 def write_results(results, output_name):
-    csv = "Strategy,id,cmpid,nrOfMisses,nrOfInputs,depth,status,totalTime,nrOfOffsets,cyclomatic,oviedo,chain_size,cases,depth2,trace_length,flipped,reachableness,combined\n"
+    csv = "Strategy,id,cmpid,nrOfMisses,nrOfInputs,depth,status,totalTime,nrOfOffsets,cyclomatic,oviedo,chain_size,cases,depth2,trace_length,flipped,reachableness,combined,comment\n"
     for result in results:
         for key in result:
             if key != 'trace_length':
                 result[key] = str(result[key])
-        csv += result['strategy'] + "," + result['id'] + "," + result['cmpid'] + "," + result['nrOfMisses'] + "," + result['nrOfInputs'] + "," + result['depth'] + "," + result['status'] + "," + result['totalExecutionTime'] + "," + result['nrOfOffsets'] + "," + result['cyclomatic'] + "," + result['oviedo'] + "," + result['chain_size'] + ","+ result['cases']+ ","+ str(result['trace_length'][0]) + ","+ str(result['trace_length'][1]) + ","+ result['flipped'] + "," + result['reachableness'] + "," + result['combined']
+        csv += result['strategy'] + "," + result['id'] + "," + result['cmpid'] + "," + result['nrOfMisses'] + "," + result['nrOfInputs'] + "," + result['depth'] + "," + result['status'] + "," + result['totalExecutionTime'] + "," + result['nrOfOffsets'] + "," + result['cyclomatic'] + "," + result['oviedo'] + "," + result['chain_size'] + ","+ result['cases']+ ","+ str(result['trace_length'][0]) + ","+ str(result['trace_length'][1]) + ","+ result['flipped'] + "," + result['reachableness'] + "," + result['combined'] + "," + result['comment']
         csv += "\n"
     with open(output_name, 'w') as output_file:
         output_file.write(csv)
@@ -63,6 +65,7 @@ def get_depth_from_traces(traces):
 
 def average_dynamic_files(dynamic_files):
     dynamic_results = {}
+    counter = 0
     for dynamic_file in dynamic_files:
         for strategy in dynamic_file:
             if strategy not in dynamic_results:
@@ -72,14 +75,25 @@ def average_dynamic_files(dynamic_files):
                     #Take average of time, if it was flipped, set status to flipped
                     combined = dynamic_results[strategy][file_name]['combined']
                     old_total_time = dynamic_results[strategy][file_name]['totalExecutionTime']
-                    new_total_time = (dynamic_file[strategy][file_name]['totalExecutionTime'] + old_total_time*combined)/(combined+1)
-                    dynamic_results[strategy][file_name]['combined'] += 1
-                    dynamic_results[strategy][file_name]['totalExecutionTime'] = new_total_time
+                    try:
+                        new_total_time = (dynamic_file[strategy][file_name]['totalExecutionTime'] + old_total_time*combined)/(combined+1)
+                        dynamic_results[strategy][file_name]['combined'] += 1
+                        dynamic_results[strategy][file_name]['totalExecutionTime'] = new_total_time
+                    except:
+                        print(strategy)
+                        print(file_name)
+                        counter +=1
                     if (dynamic_file[strategy][file_name]['status'] == defs.FLIPPED_STRING):
                         dynamic_results[strategy][file_name]['status'] = defs.FLIPPED_STRING
                 else:
                     dynamic_results[strategy][file_name] = dynamic_file[strategy][file_name]
+                    if dynamic_results[strategy][file_name]['totalExecutionTime'] == None:
+                        print(file_name)
+                        print(strategy)
+                        dynamic_results[strategy][file_name]['totalExecutionTime'] = 15
                     dynamic_results[strategy][file_name]['combined'] = 1
+    if counter != 0:
+        print(counter)
     return dynamic_results
 
 def main(argv):
@@ -111,11 +125,12 @@ def main(argv):
     for dynamic_folder in dynamic_folders:
         dynamic_files.append(Parser.parse_folder(dynamic_folder))
     print("Parsed dynamic files")
+    dynamic_results = average_dynamic_files(dynamic_files)
     i = Importer(traces_folder)
     traces = i.get_traces_iterator()
     relative_depth = get_depth_from_traces(traces)
     print("Parsed trace files")
-    dynamic_results = average_dynamic_files(dynamic_files)
+    #dynamic_results = average_dynamic_files(dynamic_files)
     results = combine_results(dynamic_results, static_files, relative_depth)
     print("Created results")
     write_results(results, output_name)
