@@ -58,3 +58,12 @@ The results from multiple runs can be added together by adding multiple `-d` arg
 ## Data Analysis
 
 The data analysis can be found in the `analysis` folder.
+The raw data is present in the `result` folder. We have collected results from the following binaries:
+
+- nm -C
+- gif2png
+- djpeg
+- jhead
+- xmlwf
+- tcpdump
+- file
