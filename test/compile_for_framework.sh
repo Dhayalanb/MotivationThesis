@@ -29,7 +29,7 @@ if [ "$#" -ne 1 ] || ! [ -d "$1" ]; then
     exit 1
 fi
 
-rm -rf $output
+rm -rf " ./output"
 name=$1
 
 echo "Compile..."
@@ -39,12 +39,12 @@ target=${name}/${name}
 rm -f ${target}.fast
 rm -f ${target}.static
 rm -f ${target}.sym
-
+mkdir -p "./output/static"
 # export ANGORA_CUSTOM_FN_CONTEXT=0
 
 bin_dir=../bin/
-ANGORA_USE_ASAN=1 USE_FAST=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.test
-OUTPUT_STATIC_ANALYSIS_LOC_VAR=./output/static/ ANGORA_USE_ASAN=1 USE_FAST=1 ${bin_dir}/static-analysis-clang ${target}.c -lz -o ${target}.static
+USE_FAST=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.test
+ANGORA_OUTPUT_STATIC_ANALYSIS_LOC=./output/static/ USE_FAST=1 ${bin_dir}/static-analysis-clang ${target}.c -lz -o ${target}.static
 rm -f ${target}.static
 # USE_PIN=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.pin
 #LLVM_COMPILER=clang wllvm -O0 -g ${target}.c -lz -o ${target}
