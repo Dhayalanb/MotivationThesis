@@ -1,5 +1,0 @@
-Strategy,Total,ConcolicStrategy,LengthTaintStrategy,RandomTaintStrategy,GradientDescentStrategy,RandomStrategy,MagicByteStrategy,OneByteStrategy
-0,334,2.40,12.87,0.00,0.00,47.01,0.00,0.00
-1,79,67.09,0.00,64.56,68.35,46.84,68.35,70.89
-2,93,91.40,0.00,49.46,93.55,58.06,65.59,0.00
-13,5,100.00,0.00,20.00,60.00,60.00,100.00,0.00
