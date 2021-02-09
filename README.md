@@ -70,4 +70,4 @@ The raw data is present in the `result` folder. We have collected results from t
 
 ## Test
 
-To test if everything works, run the `test_everything.sh` script in the test directory after having built the project and the submodules, which will fuzz, test and collect results from a tiny C program.
+To test if everything works, run the `test/test_binary.sh mini` script in the test directory after having built the project and the submodules, which will fuzz, test and collect results from a tiny C program.
