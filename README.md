@@ -28,7 +28,7 @@ The submodules are located in the `includes` directory.
 
 For the Angora submodule use the ``store-traces`` branch.
 
-For the SymCC submodule use the ``partial-symbolic`` branch.
+For the SymCC submodule use the ``partial-symbolic`` branch and create a symbolic link to the created `symcc` and `sym++` binaries in the `./bin/` folder of this repo.
 
 ## Collecting traces
 
