@@ -50,7 +50,7 @@ rm -f ${target}.fast ${target}.cmp ${target}.taint
 
 # export ANGORA_CUSTOM_FN_CONTEXT=0
 
-bin_dir=../includes/angora/bin/
+bin_dir=../includes/Angora/bin/
 ANGORA_USE_ASAN=1 USE_FAST=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.fast
 USE_TRACK=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.taint
 # USE_PIN=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.pin

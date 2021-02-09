@@ -70,15 +70,15 @@ COND_DONE_ST = 2
 
 
 #Program info
-BINARY = "../test/mini/mini.fast"
-CONCOLIC_BINARY = "../test/mini/mini.sym"
-INPUT_DIR='../test/input/'
-OUTPUT_DIR='../output/'
-TRACES_FOLDER='../traces/mini/'
+BINARY = "."
+CONCOLIC_BINARY = "."
+INPUT_DIR='../tmp/input/'
+OUTPUT_DIR='.'
+TRACES_FOLDER='.'
 ARGUMENTS=['@@']
 
 # Threading
-NUMBER_OF_THREADS = 64
+NUMBER_OF_THREADS = 4
 MAX_VIRTUAL_MEMORY=100*1024*1024 #100MB
 MAXIMUM_TIMEOUTS = 10
 
@@ -110,9 +110,9 @@ COMMENT_WRONG_LENGTH="Wrong length"
 RANDOM_REUSE_PREVIOUS=False
 
 #concolic
-CONCOLIC_TMP_FOLDER = "../test/concolic_tmp/"
+CONCOLIC_TMP_FOLDER = "../tmp/concolic_tmp/"
 MAXIMUM_CONCOLIC_EXECUTION_TIME = MAXIMUM_EXECUTION_TIME-2 #use 2 seconds to try the generated inputs.
-SYMCC_LOG_FILE="../test/symcc_output"
+SYMCC_LOG_FILE="../tmp/symcc_output"
 
 #length
 STEP_SIZE_LENGTH = 100
