@@ -39,12 +39,12 @@ def combine_results(dynamic_files, static_files, relative_depth):
 
 
 def write_results(results, output_name):
-    csv = "Strategy,id,cmpid,nrOfMisses,nrOfInputs,depth,status,totalTime,nrOfOffsets,cyclomatic,oviedo,chain_size,cases,depth2,trace_length,flipped,reachableness,combined\n"
+    csv = "Strategy,id,cmpid,nrOfMisses,nrOfInputs,depth,status,totalTime,nrOfOffsets,cyclomatic,oviedo,chain_size,cases,depth2,trace_length,flipped,reachableness,combined,comment\n"
     for result in results:
         for key in result:
             if key != 'trace_length':
                 result[key] = str(result[key])
-        csv += result['strategy'] + "," + result['id'] + "," + result['cmpid'] + "," + result['nrOfMisses'] + "," + result['nrOfInputs'] + "," + result['depth'] + "," + result['status'] + "," + result['totalExecutionTime'] + "," + result['nrOfOffsets'] + "," + result['cyclomatic'] + "," + result['oviedo'] + "," + result['chain_size'] + ","+ result['cases']+ ","+ str(result['trace_length'][0]) + ","+ str(result['trace_length'][1]) + ","+ result['flipped'] + "," + result['reachableness'] + "," + result['combined']
+        csv += result['strategy'] + "," + result['id'] + "," + result['cmpid'] + "," + result['nrOfMisses'] + "," + result['nrOfInputs'] + "," + result['depth'] + "," + result['status'] + "," + result['totalExecutionTime'] + "," + result['nrOfOffsets'] + "," + result['cyclomatic'] + "," + result['oviedo'] + "," + result['chain_size'] + ","+ result['cases']+ ","+ str(result['trace_length'][0]) + ","+ str(result['trace_length'][1]) + ","+ result['flipped'] + "," + result['reachableness'] + "," + result['combined'] + ","  + result['comment']
         csv += "\n"
     with open(output_name, 'w') as output_file:
         output_file.write(csv)
