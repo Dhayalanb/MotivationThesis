@@ -352,7 +352,7 @@ bool StaticMetrics::runOnModule(Module &M)
       errs() << "Output file name is "<< output_location << "\n";
 
 
-    Output =         make_unique<std::ofstream>(std::string(output_location)+"/static_analysis_results." + std::to_string(ModId) + std::string(".out"), std::ios::out);
+    Output =         make_unique<std::ofstream>(std::string(output_location)+"/Static/static_analysis_results." + std::to_string(ModId) + std::string(".out"), std::ios::out);
     assert(Output->good() && "Stream to output file is not feeling good...");
     *Output << "BasicBlock,Condition,Cyclomatic,Oviedo,ChainSize,CompareSize,"
                "ComparesConstant,ComparesPointer,IsEquality,IsConstant,Cases\n";

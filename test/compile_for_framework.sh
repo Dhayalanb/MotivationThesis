@@ -39,13 +39,29 @@ target=${name}/${name}
 rm -f ${target}.fast
 rm -f ${target}.static
 rm -f ${target}.sym
-mkdir -p "./output/static"
+rm -f ${target}.orc
+rm -f ${target}.test
+rm -f ${target}.track
+
+
+rm -rf mini/static/
+mkdir mini/static
+mkdir mini/static/Static
+mkdir mini/static/analysis/
+mkdir mini/static/analysis/subanalysis/
+mkdir mini/static/input_dir
+
+export OUTPUT_STATIC_ANALYSIS_LOC_VAR=/Motivation/test/mini/static/
+
 # export ANGORA_CUSTOM_FN_CONTEXT=0
 
 bin_dir=../bin/
-USE_FAST=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.test
-ANGORA_OUTPUT_STATIC_ANALYSIS_LOC=./output/static/ USE_FAST=1 ${bin_dir}/static-analysis-clang ${target}.c -lz -o ${target}.static
-rm -f ${target}.static
+USE_FAST=1 /Motivation/includes/Angora/bin/angora-clang ${target}.c -lz -o ${target}.fast
+USE_TRACK=1 /Motivation/includes/Angora/bin/angora-clang ${target}.c -lz -o ${target}.track
+USE_FAST=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.orc
+USE_FAST=1 ${bin_dir}/static-analysis-clang ${target}.c -lz -o ${target}.static
+${bin_dir}/symcc ${target}.c -o ${target}.sym
+
 # USE_PIN=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.pin
 #LLVM_COMPILER=clang wllvm -O0 -g ${target}.c -lz -o ${target}
 #extract-bc ${target}
@@ -58,6 +74,6 @@ echo "Compile Done.."
 
 echo "Compiling symblic version"
 
-${bin_dir}/symcc ${target}.c -o ${target}.sym
+
 
 echo "Symbolic version compiled"

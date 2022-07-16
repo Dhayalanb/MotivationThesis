@@ -46,13 +46,13 @@ echo "Compile..."
 
 target=${name}/${name}
 
-rm -f ${target}.fast ${target}.cmp ${target}.taint 
+# rm -f ${target}.fast ${target}.cmp ${target}.taint 
 
 # export ANGORA_CUSTOM_FN_CONTEXT=0
 
-bin_dir=../includes/Angora/bin/
-ANGORA_USE_ASAN=1 USE_FAST=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.fast
-USE_TRACK=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.taint
+# bin_dir=../includes/Angora/bin/
+# ANGORA_USE_ASAN=1 USE_FAST=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.fast
+# USE_TRACK=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.taint
 # USE_PIN=1 ${bin_dir}/angora-clang ${target}.c -lz -o ${target}.pin
 #LLVM_COMPILER=clang wllvm -O0 -g ${target}.c -lz -o ${target}
 #extract-bc ${target}
@@ -73,7 +73,7 @@ args=`cat ${args_file}`
 
 cmd="$envs $fuzzer -M 0 -A -i $input -o $output -j $num_jobs"
 if [ $MODE = "llvm" ]; then
-    cmd="$cmd -m llvm -t ${target}.taint ${sync_afl} -- ${target}.fast ${args}"
+    cmd="$cmd -m llvm -t ${target}.track ${sync_afl} -- ${target}.fast ${args}"
 elif [ $MODE = "pin" ]; then
     cmd="$cmd -m pin -t ${target}.pin ${sync_afl} -- ${target}.fast ${args}"
 fi;
