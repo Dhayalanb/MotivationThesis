@@ -20,12 +20,17 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/User.h>
+#include <llvm/Analysis/CFG.h>
 
 #include <algorithm>
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <map>
+
 
 #include "./debug.h"
 #include "./defs.h"
@@ -70,12 +75,18 @@ namespace
     };
 
     std::string ModName;
+    std::error_code error;
+    std::string str;
+    int bbCount;
     u32 ModId;
     u32 CidCounter;
     bool is_bc;
     u32 BBID = 1;
     // Const Variables
     DenseSet<u32> UniqCidSet;
+    // If there is a compare in the basic block then the basic block gets this hashID too
+    std::map<BasicBlock*, int> basicBlockMap;
+    std::map<BasicBlock*, u32> basicBlockMapUniqID;     
 
     // Configurations
     bool gen_id_random;
@@ -95,11 +106,15 @@ namespace
     u32 getInstructionId(Instruction *Inst);
     void initVariables(Module &M);
     bool shouldVisitCallInstruction(Instruction *Inst);
+    bool writeFunctionCFGtofile(Function &F);
+    std::string  bbname(BasicBlock &B);
 
   public:
     static char ID;
 
-    StaticMetrics() : ModulePass(ID) {}
+    StaticMetrics() : ModulePass(ID) {
+      bbCount = 0;
+    }
 
     void getAnalysisUsage(AnalysisUsage &AU) const override
     {
@@ -113,7 +128,7 @@ namespace
 
 char StaticMetrics::ID = 0;
 
-u32 StaticMetrics::getInstructionId(Instruction *Inst)
+u32 StaticMetrics::getInstructionId(Instruction *Inst) 
 {
   u32 h = 0;
   if (is_bc)
@@ -193,6 +208,101 @@ void StaticMetrics::initVariables(Module &M)
   ExploitList.set(SpecialCaseList::createOrDie(AllExploitListFiles));
 };
 
+std::string StaticMetrics::bbname(BasicBlock &B){
+  std::string name =std::to_string(basicBlockMap[&B]); 
+  if (basicBlockMapUniqID.find(&B)== basicBlockMapUniqID.end()) return name;
+  name = std::to_string(basicBlockMapUniqID[&B]);
+  return name;
+}
+
+
+
+bool StaticMetrics::writeFunctionCFGtofile(Function &F)
+{
+  /*
+   This is where we open the file to store the cfg for the function
+  */
+  char const *output_location = getenv("OUTPUT_STATIC_ANALYSIS_LOC_VAR");
+  std::string CFG_dir = std::string(output_location);
+  raw_string_ostream rso(str);
+
+  std::string name = std::string(F.getName());
+  name = CFG_dir+"/analysis/"+name;
+  std::ofstream file_analysis;
+  file_analysis.open (name, std::ofstream::out);
+
+  name = name + ".dot";
+  std::ofstream file;
+  file.open (name, std::ofstream::out);
+
+  errs() <<"\nName of the file is " << name  << " and the name of the function is "<< std::string(F.getName())<< "\n";
+  enum sys::fs::OpenFlags F_None;
+	
+  
+  // if(file_analysis)
+  // {
+  //   errs() <<"\n There is an erro trying to open the file"<< name <<"\n";
+  // }
+
+  //file << "digraph \"CFG for'" + F.getName() + "\' function\" {\n";
+  file << "digraph G{\n";
+  for (Function::iterator B_iter = F.begin(); B_iter != F.end(); ++B_iter){
+				BasicBlock* curBB = &*B_iter;
+				std::string name = curBB->getName().str();
+				int fromCountNum;
+				int toCountNum;
+				if (basicBlockMap.find(curBB) != basicBlockMap.end())
+				{
+					fromCountNum = basicBlockMap[curBB];
+				}
+				else
+				{
+					fromCountNum = bbCount;
+					basicBlockMap[curBB] = bbCount++;
+				}
+
+        
+        //file << "\t" << bbname(*curBB) << " [shape=record, label=\"{";
+				//file << "" << bbname(*curBB) << ":\\l\\l";
+				for (BasicBlock::iterator I_iter = curBB->begin(); I_iter != curBB->end(); ++I_iter) {
+					//printInstruction(&*I_iter,  os);
+          Instruction* inst = &*I_iter;
+          if (inst->getMetadata(NoSanMetaId)){
+          continue;}
+         
+					//file << *I_iter << "\\l\n";
+				}
+				//file << "}\"];\n";
+				for (BasicBlock *SuccBB : successors(curBB)){
+					if (basicBlockMap.find(SuccBB) != basicBlockMap.end())
+					{
+						toCountNum = basicBlockMap[SuccBB];
+					}
+					else
+					{
+						toCountNum = bbCount;
+						basicBlockMap[SuccBB] = bbCount++;
+					}
+
+					file << "\t" <<"BB"<<bbname(*curBB)<< "->"
+						<<"BB"<< bbname(*SuccBB) << ";\n";
+
+          file_analysis<<bbname(*curBB)<< ","
+						<<bbname(*SuccBB) << "\n";
+
+          // if (basicBlockMapUniqID.find(curBB)!= basicBlockMapUniqID.end() && basicBlockMapUniqID.find(SuccBB)!= basicBlockMapUniqID.end()){
+          //   *adjfile  << bbname(*curBB)<< ","
+					// 	<< bbname(*SuccBB) << "\n";
+          //   }
+				}
+			}
+			file << "}\n";
+			file.close();
+			return true;
+		}
+
+
+
 bool StaticMetrics::shouldVisitCallInstruction(Instruction *Inst)
 {
 
@@ -219,28 +329,38 @@ bool StaticMetrics::shouldVisitCallInstruction(Instruction *Inst)
   return true;
 };
 
+// The main runOnModule
+
 bool StaticMetrics::runOnModule(Module &M)
 {
   errs() << "Running static pass\n";
-
   initVariables(M);
 
+  raw_string_ostream rso(str);
+  enum sys::fs::OpenFlags F_None;
+  enum sys::fs::OpenFlags F_Append;
+  // std::ofstream adjfile;
+  // adjfile.open ("adj.txt", std::ofstream::out | std::ofstream::app);
+
+  // This code is for generating the output file
   if (!Output)
   {
-    char const *output_location = getenv(OUTPUT_STATIC_ANALYSIS_LOC_VAR);
+    char const *output_location = getenv("OUTPUT_STATIC_ANALYSIS_LOC_VAR");
     if (!output_location) {
       output_location = "./static_analysis_results.";
     }
-    Output =
-        make_unique<std::ofstream>(std::string(output_location) + std::to_string(ModId) + std::string(".out"), std::ios::out);
+      errs() << "Output file name is "<< output_location << "\n";
+
+
+    Output =         make_unique<std::ofstream>(std::string(output_location)+"/static_analysis_results." + std::to_string(ModId) + std::string(".out"), std::ios::out);
     assert(Output->good() && "Stream to output file is not feeling good...");
     *Output << "BasicBlock,Condition,Cyclomatic,Oviedo,ChainSize,CompareSize,"
                "ComparesConstant,ComparesPointer,IsEquality,IsConstant,Cases\n";
   }
 
   SmallVector<User const *, 32> Chain;
-
-  for (auto &F : M)
+  // raw_fd_ostream fileID("getInstruction.txt", error, F_None);
+  for (auto &F : M) // for every function in the module
   {
     if (F.isDeclaration() || F.getName().startswith(StringRef("asan.module")))
       continue;
@@ -259,7 +379,7 @@ bool StaticMetrics::runOnModule(Module &M)
       BBID++;
       std::vector<Instruction *> inst_list;
 
-      for (auto inst = BB->begin(); inst != BB->end(); inst++)
+      for (auto inst = BB->begin(); inst != BB->end(); inst++) // iterates through all the instructions in the basic blocks and pushes them in the isntruction vector
       {
         Instruction *Inst = &(*inst);
         inst_list.push_back(Inst);
@@ -269,13 +389,13 @@ bool StaticMetrics::runOnModule(Module &M)
       {
         auto I = *inst;
         Metrics M;
-        if (I->getMetadata(NoSanMetaId))
-          continue;
-        if (isa<CallInst>(I) && !shouldVisitCallInstruction(I))
+        if (I->getMetadata(NoSanMetaId)){
+          continue;}
+        if (isa<CallInst>(I) && !shouldVisitCallInstruction(I)) // if its a call instruction
         {
           continue;
         }
-        if (auto *CmpI = dyn_cast<CmpInst>(I))
+        if (auto *CmpI = dyn_cast<CmpInst>(I)) // if the instruction is an compare instruction
         {
           Instruction *InsertPoint = CmpI->getNextNode();
           if (!InsertPoint || isa<ConstantInt>(CmpI))
@@ -290,7 +410,7 @@ bool StaticMetrics::runOnModule(Module &M)
                          P == CmpInst::Predicate::FCMP_OEQ ||
                          P == CmpInst::Predicate::FCMP_UEQ;
         }
-        else if (isa<CallInst>(I) || isa<InvokeInst>(I))
+        else if (isa<CallInst>(I) || isa<InvokeInst>(I)) //if the instruction is a callinstr or invokeinstr
         {
           if (isa<InvokeInst>(I))
           {
@@ -308,9 +428,9 @@ bool StaticMetrics::runOnModule(Module &M)
           M.ComparesConstant = false;
           M.IsEquality = true;
         }
-        else if (auto *Branch = dyn_cast<BranchInst>(I))
+        else if (auto *Branch = dyn_cast<BranchInst>(I)) // if the instruction is a branch instruction
         {
-          if (!Branch->isConditional())
+          if (!Branch->isConditional()) //if the branch is not conditional
             continue;
 
           auto *Condition = handleBranchCondition(Branch->getCondition(), M);
@@ -323,24 +443,33 @@ bool StaticMetrics::runOnModule(Module &M)
           LLVM_DEBUG(dbgs() << "Branch " << BBID << ":\n"
                             << *Condition << '\n');
         }
-        else if (auto *Switch = dyn_cast<SwitchInst>(I))
+        else if (auto *Switch = dyn_cast<SwitchInst>(I)) // if the instruction is a switch instruction
         {
           M.CmpSize = Switch->getType()->getScalarSizeInBits();
           M.NumCases = Switch->getNumCases();
           M.ComparesConstant = true;
           M.ComparesPointer = false;
           M.IsEquality = true;
-          LLVM_DEBUG(dbgs() << "Switch " << BBID << ":\n"
+          LLVM_DEBUG(dbgs() << "Switch " << BBID <<  ":\n"
                             << *Switch << '\n');
         }
         else
         {
-          continue;
+          continue; //if its any other instruction just skip
         }
         try
         {
+          //basicBlockMapUniqID;
+
+          u32 getInstructionIdreturn = getInstructionId(I);
+          if(basicBlockMapUniqID.find(*bi)== basicBlockMapUniqID.end()){
+              basicBlockMapUniqID[*bi]= getInstructionIdreturn;
+          }
+           
+         
+          // fileID << basicBlockMapUniqID[*bi] << "\n";
           computeBackSlice(I, Chain);
-          *Output << BBID << ',' << getInstructionId(I) << ',' << CyclomaticNumber
+          *Output << BBID << ',' << getInstructionIdreturn << ',' << CyclomaticNumber
                   << ',' << OviedoComplexity << ',' << Chain.size() << ','
                   << M.CmpSize << ',' << M.ComparesConstant << ','
                   << M.ComparesPointer << ',' << M.IsEquality << ','
@@ -354,11 +483,14 @@ bool StaticMetrics::runOnModule(Module &M)
         }
       }
     }
+  
+  writeFunctionCFGtofile(F);
+  
   }
-
   return false;
 }
 
+//function to get complexity
 void StaticMetrics::getComplexity(Function const &F, unsigned &Cyclomatic,
                                   unsigned &Oviedo)
 {
@@ -644,6 +776,7 @@ void StaticMetrics::computeBackSlice(Instruction const *I,
   }
 }
 
+// function to save the metrics to  the file
 void StaticMetrics::print(raw_ostream &O, Module const *) const
 {
   O << "Metrics have been stored into '"
@@ -657,6 +790,8 @@ static void registerStaticAnalysisPass(const PassManagerBuilder &,
   PM.add(new StaticMetrics());
 }
 
+
+// The pass named staticMetrics is registered
 static RegisterPass<StaticMetrics> X("static-metrics",
                                      "Various complexity metrics",
                                      true /* Only looks at CFG */,
