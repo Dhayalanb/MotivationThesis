@@ -1,0 +1,10 @@
+gif2png
+gogif2png
+*.o
+*.tar.gz
+gif2png.1
+index.html
+gif2png.html
+manpage.links
+manpage.refs
+web2png.1

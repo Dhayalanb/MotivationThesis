@@ -1,0 +1,5 @@
+BasicBlock,Condition,Cyclomatic,Oviedo,ChainSize,CompareSize,ComparesConstant,ComparesPointer,IsEquality,IsConstant,Cases
+2,660993395,4,34,3,64,1,0,0,0,0
+3,661008641,4,34,3,0,1,1,1,0,0
+4,660992636,4,34,3,0,1,1,1,0,0
+5,661019861,4,34,5,8,1,0,1,0,0

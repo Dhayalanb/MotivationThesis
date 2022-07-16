@@ -356,6 +356,7 @@ forksrv_socket
 /build/CMakeCache.txt
 /output
 .gdb_history
+executor/target/*
 experiments/*
 angora_results/**/*.json
 angora_results/**/id*

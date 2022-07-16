@@ -1,0 +1,28 @@
+		gif2png -- GIF to PNG graphics file conversion
+
+The gif2png program converts files from the Graphic Interchange Format
+to Portable Network Graphics.  It can be built under any operating
+system conforming to POSIX.1-2001 and Go; this includes all modern
+Unixes.
+
+This distribution also supplies web2png, a Python front end for
+gif2png which automagically converts entire web hierarchies (the
+graphics files themselves and references to them in web pages).
+
+Installation instructions are in the file INSTALL.
+
+You can test the correctness of this code with the regression-test
+suite in the directory test/; this can be done with 'make check' from
+the toplevel directory.
+
+Some options supported in older (pre-3.0.0) versions of this tool were
+dropped when the code was ported to Go.  If you have a compatibility
+requirement for one of these, please file an issue on the project
+tracker.
+
+See the file 'control' for repository and hosting information.
+
+
+					Eric S. Raymond
+					esr@thyrsus.com
+					http://www.catb.org/~esr

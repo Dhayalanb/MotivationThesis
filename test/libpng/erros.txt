@@ -1,0 +1,139 @@
+/FuzzerWithML/tests/libpng-1.6.34/contrib/tools/png-fix-itxt.c:81: undefined reference to `dfs$crc32'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/tools/png-fix-itxt.c:93: undefined reference to `dfs$crc32'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/tools/png-fix-itxt.c:113: undefined reference to `dfs$crc32'
+
+/FuzzerWithML/tests/libpng-1.6.34/png.c:986: undefined reference to `dfs$inflateReset'
+
+/FuzzerWithML/tests/libpng-1.6.34/png.c:2368: undefined reference to `dfs$adler32'
+/FuzzerWithML/tests/libpng-1.6.34/png.c:2369: undefined reference to `dfs$adler32'
+contrib/tools/pngfix.o: In function `zlib_init':
+/FuzzerWithML/tests/libpng-1.6.34/contrib/tools/pngfix.c:2230: undefined reference to `dfs$inflateInit2_'
+contrib/tools/pngfix.o: In function `zlib_reset':
+/FuzzerWithML/tests/libpng-1.6.34/contrib/tools/pngfix.c:2184: undefined reference to `dfs$inflateReset2'
+contrib/tools/pngfix.o: In function `zlib_end':
+/FuzzerWithML/tests/libpng-1.6.34/contrib/tools/pngfix.c:2159: undefined reference to `dfs$inflateEnd'
+contrib/tools/pngfix.o: In function `zlib_advance':
+/FuzzerWithML/tests/libpng-1.6.34/contrib/tools/pngfix.c:2375: undefined reference to `dfs$inflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/png.c:986: undefined reference to `dfs$inflateReset'
+
+/FuzzerWithML/tests/libpng-1.6.34/png.c:2368: undefined reference to `dfs$adler32'
+/FuzzerWithML/tests/libpng-1.6.34/png.c:2369: undefined reference to `dfs$adler32'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngread.c:979: undefined reference to `dfs$inflateEnd'
+
+/FuzzerWithML/tests/libpng-1.6.34/png.c:986: undefined reference to `dfs$inflateReset'
+
+/FuzzerWithML/tests/libpng-1.6.34/png.c:2368: undefined reference to `dfs$adler32'
+/FuzzerWithML/tests/libpng-1.6.34/png.c:2369: undefined reference to `dfs$adler32'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngread.c:979: undefined reference to `dfs$inflateEnd'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:407: undefined reference to `dfs$inflateReset2'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:416: undefined reference to `dfs$inflateInit2_'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:429: undefined reference to `dfs$inflateValidate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:662: undefined reference to `dfs$inflateReset'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngread.c:979: undefined reference to `dfs$inflateEnd'
+
+/FuzzerWithML/tests/libpng-1.6.34/png.c:986: undefined reference to `dfs$inflateReset'
+
+/FuzzerWithML/tests/libpng-1.6.34/png.c:2368: undefined reference to `dfs$adler32'
+/FuzzerWithML/tests/libpng-1.6.34/png.c:2369: undefined reference to `dfs$adler32'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:407: undefined reference to `dfs$inflateReset2'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:416: undefined reference to `dfs$inflateInit2_'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:429: undefined reference to `dfs$inflateValidate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:662: undefined reference to `dfs$inflateReset'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwrite.c:945: undefined reference to `dfs$deflateEnd'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:407: undefined reference to `dfs$inflateReset2'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:416: undefined reference to `dfs$inflateInit2_'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:429: undefined reference to `dfs$inflateValidate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:662: undefined reference to `dfs$inflateReset'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngread.c:979: undefined reference to `dfs$inflateEnd'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:982: undefined reference to `dfs$deflate'
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:982: undefined reference to `dfs$deflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:396: undefined reference to `dfs$deflateEnd'
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:414: undefined reference to `dfs$deflateReset'
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:418: undefined reference to `dfs$deflateInit2_'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:581: undefined reference to `dfs$deflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwrite.c:945: undefined reference to `dfs$deflateEnd'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:982: undefined reference to `dfs$deflate'
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:982: undefined reference to `dfs$deflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:396: undefined reference to `dfs$deflateEnd'
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:414: undefined reference to `dfs$deflateReset'
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:418: undefined reference to `dfs$deflateInit2_'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:581: undefined reference to `dfs$deflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwrite.c:945: undefined reference to `dfs$deflateEnd'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:407: undefined reference to `dfs$inflateReset2'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:416: undefined reference to `dfs$inflateInit2_'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:429: undefined reference to `dfs$inflateValidate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:662: undefined reference to `dfs$inflateReset'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+/FuzzerWithML/tests/libpng-1.6.34/pngrutil.c:467: undefined reference to `dfs$inflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:982: undefined reference to `dfs$deflate'
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:982: undefined reference to `dfs$deflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:396: undefined reference to `dfs$deflateEnd'
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:414: undefined reference to `dfs$deflateReset'
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:418: undefined reference to `dfs$deflateInit2_'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:581: undefined reference to `dfs$deflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwrite.c:945: undefined reference to `dfs$deflateEnd'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:982: undefined reference to `dfs$deflate'
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:982: undefined reference to `dfs$deflate'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:396: undefined reference to `dfs$deflateEnd'
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:414: undefined reference to `dfs$deflateReset'
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:418: undefined reference to `dfs$deflateInit2_'
+
+/FuzzerWithML/tests/libpng-1.6.34/pngwutil.c:581: undefined reference to `dfs$deflate'

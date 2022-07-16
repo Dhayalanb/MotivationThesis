@@ -1,0 +1,17 @@
+= Build instructions =
+
+Have a Go compiler insrtalled and type "make".
+
+Then (as root) install with:
+
+	make install
+
+You can uninstall with
+
+	make uninstall
+
+You can remove the program binaries and object files from the
+source code directory by typing `make clean'.
+
+
+

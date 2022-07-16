@@ -1,0 +1,87 @@
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:37: undefined reference to `png_create_read_struct'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:44: undefined reference to `png_set_longjmp_fn'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:46: undefined reference to `png_destroy_read_struct'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:52: undefined reference to `png_init_io'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:54: undefined reference to `png_create_info_struct'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:58: undefined reference to `png_set_keep_unknown_chunks'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:60: undefined reference to `png_read_info'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:63: undefined reference to `png_get_rowbytes'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:73: undefined reference to `png_get_image_height'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:75: undefined reference to `png_set_interlace_handling'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:82: undefined reference to `png_start_read_image'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:97: undefined reference to `png_read_row'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:103: undefined reference to `png_read_end'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:104: undefined reference to `png_destroy_read_struct'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:70: undefined reference to `png_error'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_error'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_create_read_struct'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_set_longjmp_fn'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_destroy_read_struct'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_init_io'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_create_info_struct'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_error'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_set_keep_unknown_chunks'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_read_info'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_get_rowbytes'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_get_image_height'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_set_interlace_handling'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_start_read_image'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_read_row'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_read_end'/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:37: undefined reference to `png_create_read_struct'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:44: undefined reference to `png_set_longjmp_fn'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:46: undefined reference to `png_destroy_read_struct'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:52: undefined reference to `png_init_io'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:54: undefined reference to `png_create_info_struct'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:58: undefined reference to `png_set_keep_unknown_chunks'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:60: undefined reference to `png_read_info'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:63: undefined reference to `png_get_rowbytes'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:73: undefined reference to `png_get_image_height'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:75: undefined reference to `png_set_interlace_handling'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:82: undefined reference to `png_start_read_image'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:97: undefined reference to `png_read_row'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:103: undefined reference to `png_read_end'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:104: undefined reference to `png_destroy_read_struct'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:70: undefined reference to `png_error'
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_error'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_create_read_struct'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_set_longjmp_fn'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_destroy_read_struct'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_init_io'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_create_info_struct'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_error'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_set_keep_unknown_chunks'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_read_info'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_get_rowbytes'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_get_image_height'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_set_interlace_handling'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_start_read_image'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_read_row'
+
+/FuzzerWithML/tests/libpng-1.6.34/contrib/libtests/readpng.c:56: undefined reference to `png_read_end'
